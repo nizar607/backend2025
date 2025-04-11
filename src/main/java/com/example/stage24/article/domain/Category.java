@@ -1,0 +1,46 @@
+package com.example.stage24.article.domain;
+
+import com.example.stage24.article.domain.Article;
+import com.example.stage24.user.domain.User;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+@Data
+@Entity
+@Table(name = "categories")
+public class Category {
+
+    /*
+     * - id: int
+     * - name: String
+     * - description: String
+     * - createdAt: Date
+     * - updatedAt: Date
+     */
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank
+    private String name;
+
+    @NotBlank
+    private String description;
+
+    @OneToMany(mappedBy = "category")
+    private List<Article> articles = new LinkedList<>();
+
+    @NotNull
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    @NotNull
+    private LocalDateTime updatedAt = LocalDateTime.now();
+}

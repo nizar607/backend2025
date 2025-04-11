@@ -1,0 +1,29 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/pfe2025
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+  servlet:
+    multipart:
+      max-file-size: 256MB
+      max-request-size: 256MB
+      enabled: true
+
+application:
+  security:
+    jwtSecret: I12OI3N12IONOIEN12IONEIO12JOI312KLNEOKZAKLHEIHO21IN3KL1N2LKNDIOI12OI3N12IONOIEN12IONEIO12JOI312KL
+    jwtExpirationMs: 86400000
+    jwtRefreshExpirationMs: 8640000
+
+logging:
+  level:
+    org.springframework.security.web: DEBUG
+
+upload:
+  dir: classpath:/assets/images

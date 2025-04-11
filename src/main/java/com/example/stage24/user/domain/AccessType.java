@@ -1,0 +1,21 @@
+package com.example.stage24.user.domain;
+
+public enum AccessType {
+
+    MEETING_FETCH,
+    MEETING_UPDATE,
+    MEETING_CREATE,
+    MEETING_DELETE,
+    CASE_FETCH,
+    CASE_UPDATE,
+    CASE_CREATE,
+    CASE_DELETE,
+    DOCUMENT_FETCH,
+    DOCUMENT_UPDATE,
+    DOCUMENT_CREATE,
+    DOCUMENT_DELETE,
+    INVOICE_FETCH,
+    INVOICE_CREATE,
+    INVOICE_DELETE
+
+    }
