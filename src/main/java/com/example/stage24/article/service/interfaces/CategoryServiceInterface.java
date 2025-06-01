@@ -1,22 +1,21 @@
 package com.example.stage24.article.service.interfaces;
 
 
-import com.example.stage24.article.domain.Article;
-import com.example.stage24.article.model.request.NewArticle;
+import com.example.stage24.article.domain.Category;
+import com.example.stage24.article.model.request.NewCategory;
 
-import java.io.IOException;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
-public interface ArticleServiceInterface {
+public interface CategoryServiceInterface {
 
-    public Article addArticle(NewArticle article);
+    public Category addCategory(NewCategory category);
 
-    public Article updateArticle(Article article);
+    public Category updateCategory(Category category);
 
-    public void deleteArticle(Long id);
+    public void deleteCategory(Long id);
 
-    public Optional<Article> getArticle(Long id);
+    public Optional<Category> getCategory(Long id);
 
-    public List<Article> getAllArticles();
+    public List<Category> getAllCategories();
 }

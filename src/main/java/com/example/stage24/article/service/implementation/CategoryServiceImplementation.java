@@ -1,100 +1,60 @@
 package com.example.stage24.article.service.implementation;
 
 
-import com.example.stage24.article.domain.Article;
+import com.example.stage24.article.domain.Category;
 import com.example.stage24.article.domain.Category;
 import com.example.stage24.article.domain.Stock;
-import com.example.stage24.article.model.request.NewArticle;
+import com.example.stage24.article.model.request.NewCategory;
+import com.example.stage24.article.repository.CategoryRepository;
+import com.example.stage24.article.repository.CategoryRepository;
 import com.example.stage24.article.repository.StockRepository;
+import com.example.stage24.article.service.interfaces.CategoryServiceInterface;
 import com.example.stage24.shared.SharedServiceInterface;
-import com.example.stage24.user.domain.User;
-import com.example.stage24.article.repository.ArticleRepository;
-import com.example.stage24.article.service.interfaces.ArticleServiceInterface;
-
-
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
 @AllArgsConstructor
-public class ArticleServiceImplementation implements ArticleServiceInterface {
+public class CategoryServiceImplementation implements CategoryServiceInterface {
 
-    private ArticleRepository articleRepository;
-    private StockRepository stockRepository;
+    private CategoryRepository categoryRepository;
     private SharedServiceInterface sharedService;
 
+
     @Override
-    public Article addArticle(NewArticle article) {
-        /*
-            @Id
-            @GeneratedValue(strategy = GenerationType.IDENTITY)
-            private Long id;
+    public Category addCategory(NewCategory category) {
+        Category savedCategory = new Category();
+        savedCategory.setName(category.getName());
+        savedCategory.setDescription(category.getDescription());
 
-            private String name;
-
-            private int quantity;
-
-            private int minQuantity;
-
-            private int maxQuantity;
-
-            @NotNull
-            private LocalDateTime createdAt = LocalDateTime.now();
-
-            @NotNull
-            private LocalDateTime updatedAt = LocalDateTime.now();
-         */
-
-        Article savedArticle = new Article();
-        savedArticle.setName(article.getName());
-        savedArticle.setDescription(article.getDescription());
-        savedArticle.setPrice(article.getPrice());
-        Category category = sharedService.getCategory(article.getCategory())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
-        savedArticle.setCategory(category);
-        Stock stock = new Stock();
-        stock.setQuantity(article.getQuantity());
-        stock.setArticle(savedArticle);
-        savedArticle.setStock(stock);
-
-        savedArticle.setCreatedAt(LocalDateTime.now());
-        savedArticle.setUpdatedAt(LocalDateTime.now());
-
-        Article result = articleRepository.save(savedArticle);
-        stockRepository.save(stock);
-
-        return result;
+        return categoryRepository.save(savedCategory);
     }
 
     @Override
-    public Article updateArticle(Article article) {
-        return articleRepository.save(article);
+    public Category updateCategory(Category category) {
+        return null;
     }
 
     @Override
-    public void deleteArticle(Long id) {
-        articleRepository.deleteById(id);
+    public void deleteCategory(Long id) {
+
     }
 
     @Override
-    public Optional<Article> getArticle(Long id) {
-        return articleRepository.findById(id);
+    public Optional<Category> getCategory(Long id) {
+        return categoryRepository.findById(id);
     }
 
     @Override
-    public List<Article> getAllArticles() {
-        return articleRepository.findAll();
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
     }
-
-
 }
 

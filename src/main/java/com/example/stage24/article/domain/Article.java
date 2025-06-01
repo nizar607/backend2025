@@ -3,6 +3,7 @@ package com.example.stage24.article.domain;
 
 import com.example.stage24.user.domain.Role;
 import com.example.stage24.user.domain.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,14 +38,18 @@ public class Article {
     @NotBlank
     private String description;
 
-    @NotBlank
     private double price;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonIgnore
     private Stock stock;
+
+    private String image;
 
     @NotNull
     private LocalDateTime createdAt = LocalDateTime.now();

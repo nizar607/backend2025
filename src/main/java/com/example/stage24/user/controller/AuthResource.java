@@ -23,14 +23,12 @@ import java.util.List;
 @RestController
 public class AuthResource {
 
-
     IUserService userService;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(
-                userService.authenticateUser(loginRequest)
-        );
+                userService.authenticateUser(loginRequest));
     }
 
     @PostMapping("/refreshtoken")
@@ -70,11 +68,10 @@ public class AuthResource {
         return userService.addRole(role);
     }
 
-    //@PreAuthorize("hasRole('ROLE_LAWYER')")
+    // @PreAuthorize("hasRole('ROLE_LAWYER')")
     @GetMapping("/get-users")
     public List<User> getUsers() {
         return userService.getUsers();
     }
-
 
 }

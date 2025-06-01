@@ -1,21 +1,22 @@
-// package com.example.stage24.article.service.interfaces;
+package com.example.stage24.article.service.interfaces;
 
 
-// import com.example.stage24.article.domain.Article;
+import com.example.stage24.article.domain.Article;
+import com.example.stage24.article.model.request.NewArticle;
 
-// import java.io.IOException;
-// import java.util.Optional;
-// import java.util.List;
+import java.io.IOException;
+import java.util.Optional;
+import java.util.List;
 
-// public interface ArticleServiceInterface {
+public interface ArticleServiceInterface {
 
-//     public Article addArticle(Article article) throws IOException;
+    public Article addArticle(NewArticle article);
 
-//     public Article updateArticle(Article article) throws IOException;
+    public Article updateArticle(Article article);
 
-//     public void deleteArticle(Long id);
+    public void deleteArticle(Long id);
 
-//     public Optional<Article> getArticle(Long id);
+    public Optional<Article> getArticle(Long id);
 
-//     public List<Article> getAllArticles();
-// }
+    public List<Article> getAllArticles();
+}

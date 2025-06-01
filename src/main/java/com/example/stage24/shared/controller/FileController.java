@@ -35,7 +35,7 @@ public class FileController {
         }
     }
 
-    @GetMapping("/files")
+    @GetMapping()
     public ResponseEntity<List<String>> getListFiles() {
         List<String> fileInfos = fileStorageService.loadAll()
                 .map(path -> MvcUriComponentsBuilder
@@ -47,7 +47,7 @@ public class FileController {
                 .body(fileInfos);
     }
 
-    @GetMapping("/files/{filename:.+}")
+    @GetMapping("/{filename:.+}")
     public ResponseEntity<Resource> getFile(@PathVariable String filename) {
         Resource file = fileStorageService.loadAsResource(filename);
         return ResponseEntity.ok()
@@ -55,7 +55,7 @@ public class FileController {
                 .body(file);
     }
 
-    @DeleteMapping("/files/{filename:.+}")
+    @DeleteMapping("/{filename:.+}")
     public ResponseEntity<String> deleteFile(@PathVariable String filename) {
         try {
             fileStorageService.delete(filename);
