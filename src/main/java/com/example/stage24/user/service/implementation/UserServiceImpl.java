@@ -29,7 +29,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -73,6 +75,8 @@ public class UserServiceImpl implements IUserService {
                     .collect(Collectors.toList());
 
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+
+            User user = userRepository.findByEmail(userDetails.getEmail()).orElseThrow(() -> new RuntimeException("User Not Found with username: " + userDetails.getUsername()));
 		/*
 		private String token;
 		private String type = "Bearer";
@@ -92,17 +96,22 @@ public class UserServiceImpl implements IUserService {
 
 		*/
 
+        ArrayList<String> _roles = new ArrayList<>();
+        _roles.add("ROLE_ADMIN");
+
+
             return new LoginResponse(
                     "success",
                     jwt,
                     new DataResponse(
                             "",
                             "Bearer",
-                            userDetails.getFirstName(),
-                            userDetails.getLastName(),
-                            userDetails.getEmail(),
+                            user.getFirstName(),
+                            user.getLastName(),
+                            user.getEmail(),
                             refreshToken.getToken(),
-                            roles
+                            user.getRoles().stream().map((role) -> role.getName().name()).collect(Collectors.toList()),
+                            user.getAccesses().stream().map((access) -> access.getType().name()).collect(Collectors.toList())
                     ));
         } catch (Exception e) {
             return new LoginResponse(
@@ -147,7 +156,7 @@ public class UserServiceImpl implements IUserService {
                 encoder.encode(signUpRequest.getPassword()));
 
         Set<String> strRoles = signUpRequest.getRoles();
-        Set<Role> roles = new HashSet<>();
+        List<Role> roles = new LinkedList();
 
 
         strRoles.forEach(role -> {

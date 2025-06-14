@@ -40,16 +40,15 @@ public class Article {
 
     private double price;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Category category;
 
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JsonIgnore
-    private Stock stock;
+    private int quantity;
 
     private String image;
+
+    private String sku; // Stock Keeping Unit for inventory tracking
 
     @NotNull
     private LocalDateTime createdAt = LocalDateTime.now();

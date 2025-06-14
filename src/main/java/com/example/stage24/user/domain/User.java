@@ -5,12 +5,12 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.*;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Entity
+@ToString
 @Table(name = "users")
 public class User {
 
@@ -45,16 +45,17 @@ public class User {
     private String address;
     private String image;
 
-    // Many-to-Many relationship with Role
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles = new HashSet<>();
+    private List<Role> roles = new LinkedList<>();
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
     @JoinTable(
             name = "user_accesses",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -62,9 +63,11 @@ public class User {
     )
     private List<Access> accesses = new LinkedList<>();
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     private User createdBy = null;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL)
     private List<User> createdUsers = new LinkedList<>();
 
@@ -91,4 +94,5 @@ public class User {
         this.address = address;
         this.image = image;
     }
+
 }

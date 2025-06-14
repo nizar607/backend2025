@@ -2,6 +2,7 @@ package com.example.stage24.user.service.implementation;
 
 
 
+
 import com.example.stage24.user.domain.*;
 import com.example.stage24.user.model.request.NewAgentRequest;
 import com.example.stage24.user.repository.AccessRepository;
@@ -45,7 +46,7 @@ public class AgentServiceImp implements AgentServiceInterface {
 
         });
 
-        Set<Role> roles = new HashSet<>();
+        List<Role> roles = new LinkedList();
 
         Role agentRole = roleRepository.findByName(RoleType.ROLE_AGENT)
                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
@@ -73,7 +74,7 @@ public class AgentServiceImp implements AgentServiceInterface {
 
 
     @Override
-    public User getAgentById(Long id) {
+    public User getAgentById(long id) {
         return userRepository.findById(id).orElse(null);
     }
 
@@ -86,14 +87,14 @@ public class AgentServiceImp implements AgentServiceInterface {
     }
 
     @Override
-    public User deleteAgent(Long id) {
+    public User deleteAgent(long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("no such user with this id"));
         userRepository.delete(user);
         return user;
     }
 
     @Override
-    public User updateAgent(Long id, NewAgentRequest newAgentRequest) {
+    public User updateAgent(long id, NewAgentRequest newAgentRequest) {
 
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("user to updated not found"));
 
@@ -106,18 +107,26 @@ public class AgentServiceImp implements AgentServiceInterface {
             accesses.add(_access);
         });
 
-        Set<Role> roles = new HashSet<>();
+        List<Role> roles = new LinkedList();
+
         Role agentRole = roleRepository.findByName(RoleType.ROLE_AGENT)
                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+
         roles.add(agentRole);
 
         user.setFirstName(newAgentRequest.getFirstName());
         user.setLastName(newAgentRequest.getLastName());
         user.setEmail(newAgentRequest.getEmail());
-        user.setPassword(encoder.encode(newAgentRequest.getPassword()));
+
+        if (newAgentRequest.getPassword() != null)
+            user.setPassword(encoder.encode(newAgentRequest.getPassword()));
+
         user.setPhoneNumber(newAgentRequest.getPhoneNumber());
         user.setAddress(newAgentRequest.getAddress());
-        user.setImage(newAgentRequest.getImage());
+
+        if (newAgentRequest.getImage() != null)
+            user.setImage(newAgentRequest.getImage());
+
         user.setRoles(roles);
         user.setAccesses(accesses);
 
@@ -125,6 +134,17 @@ public class AgentServiceImp implements AgentServiceInterface {
         connectedUser.ifPresent(user::setCreatedBy);
 
         return userRepository.save(user);
+    }
+
+    @Override
+    public List<String> getAccesses(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("user not found"));
+        List<Access> accesses = user.getAccesses() != null ? user.getAccesses() : new ArrayList<>();
+        List<String> strAccesses = new ArrayList<>();
+        accesses.forEach(access -> {
+            strAccesses.add(access.getType().toString());
+        });
+        return strAccesses;
     }
 
 }

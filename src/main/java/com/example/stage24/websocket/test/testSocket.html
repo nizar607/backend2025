@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Notification Test</title>
+    <!-- Load SockJS and STOMP libraries from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.2/bundles/stomp.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #messageLog {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+        .message {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .received {
+            color: green;
+        }
+        .sent {
+            color: blue;
+        }
+        .error {
+            color: red;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+        }
+        input {
+            padding: 8px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Notification Test</h1>
+    <div id="status">Status: Disconnected</div>
+    
+    <div class="controls">
+        <button id="connectBtn">Connect</button>
+        <button id="disconnectBtn" disabled>Disconnect</button>
+    </div>
+    
+    <h2>Message Log</h2>
+    <div id="messageLog"></div>
+    
+    <div class="controls">
+        <h3>Send Test Message</h3>
+        <select id="destination">
+            <option value="/app/notifications">Send to /app/notifications</option>
+            <option value="/app/user-notification">Send to /app/user-notification</option>
+            <option value="/topic/notifications">Send to /topic/notifications</option>
+        </select>
+        <input type="text" id="messageInput" placeholder="Enter message or JSON" value='{"type":"article","message":"Test notification"}'>
+        <button id="sendBtn" disabled>Send</button>
+    </div>
+    
+    <div class="controls">
+        <h3>Quick Actions</h3>
+        <button id="testArticleBtn" disabled>Test Article Notification</button>
+        <button id="testCategoryBtn" disabled>Test Category Notification</button>
+        <button id="testAgentBtn" disabled>Test Agent Notification</button>
+        <button id="testMessageBtn" disabled>Test Message Notification</button>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const statusEl = document.getElementById('status');
+        const messageLogEl = document.getElementById('messageLog');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const messageInput = document.getElementById('messageInput');
+        const destinationSelect = document.getElementById('destination');
+        const testArticleBtn = document.getElementById('testArticleBtn');
+        const testCategoryBtn = document.getElementById('testCategoryBtn');
+        const testAgentBtn = document.getElementById('testAgentBtn');
+        const testMessageBtn = document.getElementById('testMessageBtn');
+        
+        // STOMP client
+        let stompClient = null;
+        
+        // Log message to UI
+        function logMessage(message, type = 'info') {
+            const msgEl = document.createElement('div');
+            msgEl.classList.add('message', type);
+            msgEl.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            messageLogEl.appendChild(msgEl);
+            messageLogEl.scrollTop = messageLogEl.scrollHeight;
+        }
+        
+        // Connect to WebSocket
+        function connect() {
+            // Update UI
+            statusEl.textContent = 'Status: Connecting...';
+            logMessage('Connecting to WebSocket...');
+            
+            try {
+                // Create SockJS and STOMP client
+                const socket = new SockJS('http://localhost:8080/ws');
+                stompClient = StompJs.Stomp.over(socket);
+                
+                // Disable debug logs
+                stompClient.debug = function(msg) {
+                    console.log(msg);
+                };
+                
+                // Connect
+                stompClient.connect({}, 
+                    function(frame) {
+                        // Connected successfully
+                        statusEl.textContent = 'Status: Connected';
+                        logMessage('Connected to WebSocket', 'received');
+                        
+                        // Enable/disable buttons
+                        connectBtn.disabled = true;
+                        disconnectBtn.disabled = false;
+                        sendBtn.disabled = false;
+                        testArticleBtn.disabled = false;
+                        testCategoryBtn.disabled = false;
+                        testAgentBtn.disabled = false;
+                        testMessageBtn.disabled = false;
+                        
+                        // Subscribe to topics
+                        stompClient.subscribe('/topic/notifications', function(message) {
+                            logMessage(`Received from /topic/notifications: ${message.body}`, 'received');
+                        });
+                        
+                        stompClient.subscribe('/user/queue/notifications', function(message) {
+                            logMessage(`Received from /user/queue/notifications: ${message.body}`, 'received');
+                        });
+                        
+                        stompClient.subscribe('/user/queue/notification-updates', function(message) {
+                            logMessage(`Received from /user/queue/notification-updates: ${message.body}`, 'received');
+                        });
+                    },
+                    function(error) {
+                        // Connection error
+                        statusEl.textContent = 'Status: Connection Error';
+                        logMessage(`Connection error: ${error}`, 'error');
+                        
+                        // Reset buttons
+                        connectBtn.disabled = false;
+                        disconnectBtn.disabled = true;
+                        sendBtn.disabled = true;
+                        testArticleBtn.disabled = true;
+                        testCategoryBtn.disabled = true;
+                        testAgentBtn.disabled = true;
+                        testMessageBtn.disabled = true;
+                    }
+                );
+            } catch (e) {
+                logMessage(`Error initializing connection: ${e.message}`, 'error');
+                console.error(e);
+            }
+        }
+        
+        // Disconnect from WebSocket
+        function disconnect() {
+            if (stompClient) {
+                stompClient.disconnect(function() {
+                    statusEl.textContent = 'Status: Disconnected';
+                    logMessage('Disconnected from WebSocket');
+                    
+                    // Reset buttons
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                    sendBtn.disabled = true;
+                    testArticleBtn.disabled = true;
+                    testCategoryBtn.disabled = true;
+                    testAgentBtn.disabled = true;
+                    testMessageBtn.disabled = true;
+                });
+            }
+        }
+        
+        // Send message
+        function sendMessage() {
+            const destination = destinationSelect.value;
+            const message = messageInput.value;
+            
+            try {
+                // Try to parse as JSON
+                const jsonMessage = JSON.parse(message);
+                stompClient.publish({
+                    destination: destination,
+                    body: JSON.stringify(jsonMessage)
+                });
+                logMessage(`Sent to ${destination}: ${message}`, 'sent');
+            } catch (e) {
+                // Send as plain text
+                stompClient.publish({
+                    destination: destination,
+                    body: message
+                });
+                logMessage(`Sent to ${destination}: ${message}`, 'sent');
+            }
+        }
+        
+        // Send test notifications
+        function sendTestNotification(type) {
+            const id = Date.now();
+            const notification = {
+                id: id,
+                type: type,
+                message: `Test ${type} notification at ${new Date().toLocaleTimeString()}`,
+                timestamp: new Date(),
+                read: false
+            };
+            
+            stompClient.publish({
+                destination: '/app/notifications',
+                body: JSON.stringify({
+                    type: 'NEW_NOTIFICATION',
+                    data: notification
+                })
+            });
+            
+            logMessage(`Sent test ${type} notification`, 'sent');
+        }
+        
+        // Event listeners
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+        sendBtn.addEventListener('click', sendMessage);
+        testArticleBtn.addEventListener('click', () => sendTestNotification('article'));
+        testCategoryBtn.addEventListener('click', () => sendTestNotification('category'));
+        testAgentBtn.addEventListener('click', () => sendTestNotification('agent'));
+        testMessageBtn.addEventListener('click', () => sendTestNotification('message'));
+        
+        // Log library versions
+        window.addEventListener('load', function() {
+            if (typeof SockJS !== 'undefined') {
+                logMessage(`SockJS loaded: ${SockJS.version}`);
+            } else {
+                logMessage('SockJS not loaded!', 'error');
+            }
+            
+            if (typeof StompJs !== 'undefined') {
+                logMessage('StompJS loaded');
+            } else {
+                logMessage('StompJS not loaded!', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -66,10 +66,15 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
                         .requestMatchers("/api/agent/**").permitAll()
+                        .requestMatchers("/api/notifications/**").permitAll()
                         .requestMatchers("/api/documents/**").permitAll()
                         .requestMatchers("/api/files/**").permitAll()
-
-                        .anyRequest().authenticated());
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/websocket-example.html").permitAll()
+                        .requestMatchers("/topic/**").permitAll()
+                        .requestMatchers("/app/**").permitAll()
+                        .anyRequest().authenticated()
+                );
 
         http.authenticationProvider(authenticationProvider());
 

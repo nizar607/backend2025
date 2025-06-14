@@ -2,16 +2,19 @@ package com.example.stage24.basket.domain;
 
 
 import com.example.stage24.article.domain.Category;
+import com.example.stage24.user.domain.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 @Entity
-@Table(name = "articles")
-public class Basket {
+@Table(name = "shopingCarts")
+public class ShopingCart {
 
     /*
      * - id: long
@@ -28,21 +31,22 @@ public class Basket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    private String name;
+    private double subTotalAmount;
 
-    @NotBlank
-    private String description;
+    private double taxAmount;
 
-    private double price;
+    private double totalAmount;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Category category;
+    
+    @OneToMany(mappedBy = "shopingCart", fetch = FetchType.EAGER)
+    private List<Item> items;
 
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private int quantity;
-
-    private String image;
 
     @NotNull
     private LocalDateTime createdAt = LocalDateTime.now();

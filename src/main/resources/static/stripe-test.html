@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Payment Test</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .payment-form {
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .test-cards {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .test-card {
+            margin: 5px 0;
+            font-family: monospace;
+        }
+        .success {
+            color: green;
+            background-color: #d4edda;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .error {
+            color: red;
+            background-color: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        #card-element {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stripe Payment Test</h1>
+        
+        <div class="test-cards">
+            <h3>Test Card Numbers:</h3>
+            <div class="test-card"><strong>Visa (Success):</strong> 4242 4242 4242 4242</div>
+            <div class="test-card"><strong>Visa (Declined):</strong> 4000 0000 0000 0002</div>
+            <div class="test-card"><strong>Mastercard:</strong> 5555 5555 5555 4444</div>
+            <div class="test-card"><strong>American Express:</strong> 3782 822463 10005</div>
+            <div class="test-card"><strong>Expiry:</strong> Any future date (e.g., 12/25)</div>
+            <div class="test-card"><strong>CVC:</strong> Any 3-digit number (e.g., 123)</div>
+        </div>
+
+        <div class="payment-form">
+            <h3>Order Details</h3>
+            <div class="form-group">
+                <label for="orderId">Order ID:</label>
+                <input type="number" id="orderId" value="1" placeholder="Enter order ID">
+            </div>
+            <div class="form-group">
+                <label for="customerEmail">Customer Email:</label>
+                <input type="email" id="customerEmail" value="test@example.com" placeholder="Enter email">
+            </div>
+            <div class="form-group">
+                <label for="paymentMethod">Payment Method:</label>
+                <select id="paymentMethod">
+                    <option value="stripe">Stripe (Credit Card)</option>
+                    <option value="cash">Cash on Delivery</option>
+                </select>
+            </div>
+
+            <div id="stripe-section">
+                <h3>Card Details</h3>
+                <div class="form-group">
+                    <label for="card-element">Card Information:</label>
+                    <div id="card-element">
+                        <!-- Stripe Elements will create form elements here -->
+                    </div>
+                    <div id="card-errors" role="alert"></div>
+                </div>
+            </div>
+
+            <button id="create-payment" onclick="createPayment()">Create Payment</button>
+            <button id="confirm-payment" onclick="confirmPayment()" disabled>Confirm Payment</button>
+            <button id="cash-payment" onclick="createCashPayment()" style="display:none;">Create Cash Payment</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        // Replace with your actual Stripe publishable key
+        const stripe = Stripe('pk_test_51234567890abcdef'); // You need to replace this
+        const elements = stripe.elements();
+        
+        // Create card element
+        const cardElement = elements.create('card');
+        cardElement.mount('#card-element');
+        
+        let clientSecret = null;
+        let paymentIntentId = null;
+
+        // Handle payment method selection
+        document.getElementById('paymentMethod').addEventListener('change', function() {
+            const method = this.value;
+            const stripeSection = document.getElementById('stripe-section');
+            const createBtn = document.getElementById('create-payment');
+            const confirmBtn = document.getElementById('confirm-payment');
+            const cashBtn = document.getElementById('cash-payment');
+            
+            if (method === 'stripe') {
+                stripeSection.style.display = 'block';
+                createBtn.style.display = 'inline-block';
+                confirmBtn.style.display = 'inline-block';
+                cashBtn.style.display = 'none';
+            } else {
+                stripeSection.style.display = 'none';
+                createBtn.style.display = 'none';
+                confirmBtn.style.display = 'none';
+                cashBtn.style.display = 'inline-block';
+            }
+        });
+
+        async function createPayment() {
+            const orderId = document.getElementById('orderId').value;
+            const customerEmail = document.getElementById('customerEmail').value;
+            
+            if (!orderId || !customerEmail) {
+                showResult('Please fill in all fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/payments/stripe/create-intent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        customerEmail: customerEmail
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    clientSecret = data.clientSecret;
+                    paymentIntentId = data.paymentIntentId;
+                    document.getElementById('confirm-payment').disabled = false;
+                    showResult(`Payment intent created successfully! Amount: $${data.amount}`, 'success');
+                } else {
+                    showResult(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function confirmPayment() {
+            if (!clientSecret) {
+                showResult('Please create payment intent first', 'error');
+                return;
+            }
+
+            const {error, paymentIntent} = await stripe.confirmCardPayment(clientSecret, {
+                payment_method: {
+                    card: cardElement,
+                    billing_details: {
+                        email: document.getElementById('customerEmail').value,
+                    },
+                }
+            });
+
+            if (error) {
+                showResult(`Payment failed: ${error.message}`, 'error');
+            } else {
+                // Payment succeeded, now confirm on backend
+                try {
+                    const response = await fetch('/api/payments/stripe/confirm', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            paymentIntentId: paymentIntent.id
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showResult('Payment completed successfully! Order confirmed.', 'success');
+                    } else {
+                        showResult(`Backend confirmation failed: ${data.message}`, 'error');
+                    }
+                } catch (error) {
+                    showResult(`Backend error: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function createCashPayment() {
+            const orderId = document.getElementById('orderId').value;
+            
+            if (!orderId) {
+                showResult('Please enter order ID', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/payments/cash/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult(`Cash payment created! Payment ID: ${data.paymentId}. ${data.message}`, 'success');
+                } else {
+                    showResult(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showResult(`Network error: ${error.message}`, 'error');
+            }
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        // Handle card errors
+        cardElement.on('change', ({error}) => {
+            const displayError = document.getElementById('card-errors');
+            if (error) {
+                displayError.textContent = error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+    </script>
+</body>
+</html>

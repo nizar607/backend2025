@@ -1,131 +1,91 @@
 package com.example.stage24.basket.controller;
 
-import com.example.stage24.article.domain.Article;
-import com.example.stage24.article.domain.Category;
-import com.example.stage24.article.model.request.NewArticle;
-import com.example.stage24.article.model.response.ResponseArticle;
-import com.example.stage24.article.repository.ArticleRepository;
-import com.example.stage24.article.repository.CategoryRepository;
-import com.example.stage24.article.service.interfaces.ArticleServiceInterface;
-import com.example.stage24.shared.FileStorageService;
-import com.example.stage24.shared.SharedServiceInterface;
+import com.example.stage24.basket.domain.ShopingCart;
+import com.example.stage24.basket.domain.Item;
+import com.example.stage24.basket.service.interfaces.ShopingCartServiceInterface;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-@Slf4j
 @RestController
+@RequestMapping("/api/cart")
 @AllArgsConstructor
-@RequestMapping("/api/basket")
-public class BasketController {
+@Slf4j
+public class ShopingCartController {
 
-    private final ArticleServiceInterface articleService;
-    private final SharedServiceInterface sharedService;
-    private final FileStorageService fileStorageService;
-    private final CategoryRepository categoryRepository;
-    private final ArticleRepository articleRepository;
+    private final ShopingCartServiceInterface shopingCartService;
 
-
-    // Create new article
-    @PostMapping
-    public ResponseEntity<Article> createArticle(@RequestParam("name") String name,
-                                                 @RequestParam("description") String description,
-                                                 @RequestParam("price") double price,
-                                                 @RequestParam("quantity") int quantity,
-                                                 @RequestParam("category") int category,
-                                                 @RequestParam(value = "file", required = false) MultipartFile image) {
-        NewArticle article = new NewArticle();
-        article.setName(name);
-        article.setDescription(description);
-        article.setPrice(price);
-        article.setCategory(category);
-        article.setQuantity(quantity);
-        String filename = fileStorageService.store(image);
-        article.setImage(filename);
-
-        log.info("Creating new article: {}", article);
-        Article savedArticle = articleService.addArticle(article);
-        return new ResponseEntity<>(savedArticle, HttpStatus.CREATED);
-    }
-
-    // Update article
-    @PutMapping("/{id}")
-    public ResponseEntity<ResponseArticle> updateArticle(@PathVariable("id") Long id,
-                                                         @RequestParam("name") String name,
-                                                         @RequestParam("description") String description,
-                                                         @RequestParam("price") double price,
-                                                         @RequestParam("quantity") int quantity,
-                                                         @RequestParam("category") long category,
-                                                         @RequestParam(value = "file", required = false) MultipartFile image) {
-
-        Category _category = this.categoryRepository.findById(category).orElseThrow(() -> new RuntimeException("Category not found"));
-        Article _article = articleService.getArticle(id).orElseThrow(() -> new RuntimeException("Category not found"));
-        _article.setCategory(_category);
-        _article.setName(name);
-        _article.setDescription(description);
-        _article.setPrice(price);
-        _article.setQuantity(quantity);
-        if (image != null) {
-            String filename = fileStorageService.store(image);
-            _article.setImage(filename);
+    @PostMapping("/add/{articleId}")
+    public ResponseEntity<ShopingCart> addArticleToCart(
+            @PathVariable Long articleId,
+            @RequestParam(defaultValue = "1") int quantity) {
+        log.info("Adding article {} to cart with quantity: {}", articleId, quantity);
+        
+        if (quantity <= 0) {
+            log.warn("Invalid quantity: {}", quantity);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        _article.setUpdatedAt(LocalDateTime.now());
-
-        ResponseArticle article = articleService.updateArticle(_article);
-
-        return new ResponseEntity<>(article, HttpStatus.OK);
+        
+        Optional<ShopingCart> updatedCart = shopingCartService.addArticleToCart(articleId, quantity);
+        return updatedCart
+                .map(cart -> ResponseEntity.status(HttpStatus.CREATED).body(cart))
+                .orElse(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
     }
 
-
-    // Get all articles
     @GetMapping
-    public ResponseEntity<List<ResponseArticle>> getAllArticles() {
-        List<ResponseArticle> articles = articleService.getAllArticlesResponse();
-        return new ResponseEntity<>(articles, HttpStatus.OK);
+    public ResponseEntity<ShopingCart> getUserCart() {
+        log.info("Fetching user's shopping cart");
+        
+        Optional<ShopingCart> cart = shopingCartService.getOrCreateUserCart();
+        return cart
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // Get article by id
-    @GetMapping("/search")
-    public ResponseEntity<List<ResponseArticle>> searchArticleByName(@RequestParam("searchValue") String name,
-                                                                     @RequestParam("minPrice") double minPrice,
-                                                                     @RequestParam("maxPrice") double maxPrice,
-                                                                     @RequestParam("categories") List<Integer> categories) {
-        return articleService.searchArticle(name,minPrice,maxPrice,categories)
-                .map(article -> new ResponseEntity<>(article, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    @GetMapping("/items")
+    public ResponseEntity<List<Item>> getCartItems() {
+        log.info("Fetching cart items");
+        Optional<List<Item>> items = shopingCartService.getCartItems();
+        return items
+                .map(itemList -> ResponseEntity.ok(itemList))
+                .orElse(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
     }
 
-    @GetMapping("/searchByPrice/{minPrice}/{maxPrice}")
-    public ResponseEntity<List<ResponseArticle>> searchArticleByPrice(@PathVariable("minPrice") double minPrice,
-                                                                      @PathVariable("maxPrice") double maxPrice) {
-        return articleService.getArticleByPriceResponse(minPrice, maxPrice)
-                .map(article -> new ResponseEntity<>(article, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    @DeleteMapping("/item/{itemId}")
+    public ResponseEntity<ShopingCart> removeItemFromCart(@PathVariable Long itemId) {
+        log.info("Removing item {} from cart", itemId);
+        Optional<ShopingCart> updatedCart = shopingCartService.removeItemFromCart(itemId);
+        return updatedCart
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
-    // Get article by id
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseArticle> getArticleById(@PathVariable("id") Long id) {
-        return articleService.getArticleResponse(id)
-                .map(article -> new ResponseEntity<>(article, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    @PutMapping("/item/{itemId}")
+    public ResponseEntity<ShopingCart> updateItemQuantity(
+            @PathVariable Long itemId,
+            @RequestParam int quantity) {
+        log.info("Updating item {} quantity to: {}", itemId, quantity);
+        
+        if (quantity < 0) {
+            log.warn("Invalid quantity: {}", quantity);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        
+        Optional<ShopingCart> updatedCart = shopingCartService.updateItemQuantity(itemId, quantity);
+        return updatedCart
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
-
-
-    // Delete article
-    @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteArticle(@PathVariable("id") Long id) {
-        return articleService.getArticle(id)
-                .map(article -> {
-                    articleService.deleteArticle(id);
-                    return new ResponseEntity<HttpStatus>(HttpStatus.NO_CONTENT);
-                })
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    
+    @DeleteMapping("/clear")
+    public ResponseEntity<ShopingCart> clearCart() {
+        Optional<ShopingCart> clearedCart = shopingCartService.clearCart();
+        return clearedCart.map(cart -> ResponseEntity.ok().body(cart))
+                .orElse(ResponseEntity.notFound().build());
     }
 }

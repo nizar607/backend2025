@@ -27,3 +27,12 @@ logging:
 
 upload:
   dir: classpath:/assets/images
+
+# Stripe Configuration
+stripe:
+  secret:
+    key: sk_test_51RXlPKQ6JcV4ZCjFQbwDeEqDlhyMyukOGkpDcr8ZXONpc3V8DTUVCNWRgQnRoRM9KAuKXOweGnizEnwsqssuwFoV00gqiwdv9c # Replace with your actual Stripe secret key
+  publishable:
+    key: pk_test_51RXlPKQ6JcV4ZCjF1vl3NeGmma3hKAnfSGEKpULi1MYwVyduiUhViG3Dkdvdhl9IOhe6AkzlKgbyNUJGXumc2XLs00qULacej6 # Replace with your actual Stripe publishable key
+  # webhook:
+  #   secret: whsec_1234567890abcdef # Replace with your actual webhook secret

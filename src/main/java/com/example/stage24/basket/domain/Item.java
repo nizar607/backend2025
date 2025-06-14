@@ -1,22 +1,19 @@
 package com.example.stage24.basket.domain;
 
 import com.example.stage24.article.domain.Article;
-import com.example.stage24.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Entity
-@Table(name = "categories")
-public class Category {
+@Table(name = "items")
+public class Item {
 
     /*
      * - id: int
@@ -36,9 +33,18 @@ public class Category {
     @NotBlank
     private String description;
 
+    private double price;
+
+    private int quantity;
+
     @JsonIgnore
-    @OneToMany(mappedBy = "category",fetch = FetchType.EAGER)
-    private List<Article> articles = new LinkedList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "article_id")
+    private Article article;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
+    private ShopingCart shopingCart;
 
     @NotNull
     private LocalDateTime createdAt = LocalDateTime.now();
