@@ -22,8 +22,10 @@ public class DataResponse {
     private String refreshToken;
     private List<String> roles;
     private List<String> accesses;
+    private long companyId;
 
-    public DataResponse(String type, String firstName, String lastName, String email, String refreshToken, List<String> roles,List<String> accesses) {
+    public DataResponse(String type, String firstName, String lastName, String email, String refreshToken,
+            List<String> roles, List<String> accesses) {
         this.type = type;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -32,4 +34,16 @@ public class DataResponse {
         this.roles = roles;
         this.accesses = accesses;
     }
+
+    public DataResponse(String id, String type, String firstName, String lastName, String email, String refreshToken,
+            List<String> roles, List<String> accesses) {
+        this.type = type;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.refreshToken = refreshToken;
+        this.roles = roles;
+        this.accesses = accesses;
+    }
+
 }

@@ -16,7 +16,7 @@ import java.util.List;
 
 @Component
 @AllArgsConstructor
-@Order(2) // Run after RoleInitializer
+@Order(2) 
 public class UserInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;

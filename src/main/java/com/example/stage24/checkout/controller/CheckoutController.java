@@ -1,9 +1,10 @@
 package com.example.stage24.checkout.controller;
 
-import com.example.stage24.checkout.dto.CheckoutRequest;
-import com.example.stage24.checkout.dto.CheckoutResponse;
+import com.example.stage24.checkout.models.CheckoutRequest;
+import com.example.stage24.checkout.models.CheckoutResponse;
 import com.example.stage24.checkout.service.interfaces.CheckoutServiceInterface;
 import com.example.stage24.order.domain.Order;
+import com.example.stage24.shared.SharedServiceInterface;
 import com.example.stage24.user.domain.User;
 import com.example.stage24.user.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -22,11 +23,11 @@ import java.util.Optional;
 @RequestMapping("/api/checkout")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*")
+
 public class CheckoutController {
     
     private final CheckoutServiceInterface checkoutService;
-    private final UserRepository userRepository;
+    private final SharedServiceInterface sharedService;
     
     /**
      * Process complete checkout
@@ -34,7 +35,7 @@ public class CheckoutController {
     @PostMapping("/process")
     public ResponseEntity<?> processCheckout(@Valid @RequestBody CheckoutRequest checkoutRequest) {
         try {
-            User user = getCurrentUser();
+            User user = sharedService.getConnectedUser().orElseThrow( () -> new RuntimeException("User not authenticated"));
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new CheckoutResponse("User not authenticated", List.of("Please log in to continue")));
@@ -62,7 +63,7 @@ public class CheckoutController {
     @PostMapping("/calculate")
     public ResponseEntity<?> calculateOrderTotals(@Valid @RequestBody CheckoutRequest checkoutRequest) {
         try {
-            User user = getCurrentUser();
+            User user = sharedService.getConnectedUser().orElseThrow( () -> new RuntimeException("User not authenticated"));
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("User not authenticated");
@@ -97,7 +98,7 @@ public class CheckoutController {
     @PostMapping("/validate")
     public ResponseEntity<?> validateCheckout(@Valid @RequestBody CheckoutRequest checkoutRequest) {
         try {
-            User user = getCurrentUser();
+            User user = sharedService.getConnectedUser().orElseThrow( () -> new RuntimeException("User not authenticated"));
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("User not authenticated");
@@ -125,7 +126,7 @@ public class CheckoutController {
     public ResponseEntity<?> applyDiscountCode(@PathVariable String discountCode,
                                               @Valid @RequestBody CheckoutRequest checkoutRequest) {
         try {
-            User user = getCurrentUser();
+            User user = sharedService.getConnectedUser().orElseThrow( () -> new RuntimeException("User not authenticated"));
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("User not authenticated");
@@ -197,21 +198,6 @@ public class CheckoutController {
         }
     }
     
-    // Helper method to get current authenticated user
-    private User getCurrentUser() {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated()) {
-                String email = authentication.getName();
-                Optional<User> userOpt = userRepository.findByEmail(email);
-                return userOpt.orElse(null);
-            }
-            return null;
-        } catch (Exception e) {
-            log.error("Error getting current user", e);
-            return null;
-        }
-    }
     
     // Inner classes for response DTOs
     public static class OrderSummary {

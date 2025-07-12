@@ -1,8 +1,8 @@
 package com.example.stage24.checkout.service.implementation;
 
 import com.example.stage24.article.domain.Article;
-import com.example.stage24.checkout.dto.CheckoutRequest;
-import com.example.stage24.checkout.dto.CheckoutResponse;
+import com.example.stage24.checkout.models.CheckoutRequest;
+import com.example.stage24.checkout.models.CheckoutResponse;
 import com.example.stage24.checkout.service.interfaces.CheckoutServiceInterface;
 import com.example.stage24.invoice.domain.Invoice;
 import com.example.stage24.invoice.domain.InvoiceItem;
@@ -33,6 +33,19 @@ import java.util.UUID;
 @Slf4j
 public class CheckoutServiceImplementation implements CheckoutServiceInterface {
     
+    /**
+     * Custom exception for checkout-related errors
+     */
+    public static class CheckoutException extends RuntimeException {
+        public CheckoutException(String message) {
+            super(message);
+        }
+        
+        public CheckoutException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+    
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final InvoiceRepository invoiceRepository;
@@ -56,16 +69,34 @@ public class CheckoutServiceImplementation implements CheckoutServiceInterface {
             }
             
             // Create order from cart
-            Order order = createOrderFromCart(user, checkoutRequest);
-            if (order == null) {
-                return new CheckoutResponse("Failed to create order", List.of("Unable to create order from cart"));
+            Order order;
+            try {
+                order = createOrderFromCart(user, checkoutRequest);
+                if (order == null) {
+                    throw new CheckoutException("Failed to create order from cart");
+                }
+            } catch (Exception e) {
+                log.error("Error creating order for user: {}", user.getEmail(), e);
+                return new CheckoutResponse("Failed to create order", List.of(e.getMessage()));
             }
             
             // Process payment
-            Payment payment = processPayment(order, checkoutRequest);
-            if (payment == null || payment.getStatus() != Payment.PaymentStatus.COMPLETED) {
-                handlePaymentFailure(order, payment, "Payment processing failed");
-                return new CheckoutResponse("Payment failed", List.of("Unable to process payment"));
+            Payment payment;
+            try {
+                payment = processPayment(order, checkoutRequest);
+                if (payment == null) {
+                    throw new CheckoutException("Payment processing returned null");
+                }
+                if (payment.getStatus() != Payment.PaymentStatus.COMPLETED) {
+                    handlePaymentFailure(order, payment, "Payment was not completed successfully");
+                    return new CheckoutResponse("Payment failed", 
+                        List.of("Payment status: " + payment.getStatus(), 
+                               payment.getFailureReason() != null ? payment.getFailureReason() : "Unknown payment error"));
+                }
+            } catch (Exception e) {
+                log.error("Error processing payment for order: {}", order.getOrderNumber(), e);
+                handlePaymentFailure(order, null, e.getMessage());
+                return new CheckoutResponse("Payment failed", List.of(e.getMessage()));
             }
             
             // Update order status after successful payment
@@ -107,13 +138,20 @@ public class CheckoutServiceImplementation implements CheckoutServiceInterface {
     @Transactional
     public Order createOrderFromCart(User user, CheckoutRequest checkoutRequest) {
         try {
+            log.info("Creating order from cart for user: {}", user.getEmail());
+            
             // Get user's shopping cart
             Optional<ShopingCart> cartOpt = shoppingCartRepository.findByUser(user);
-            if (cartOpt.isEmpty() || cartOpt.get().getItems().isEmpty()) {
-                throw new RuntimeException("Shopping cart is empty");
+            if (cartOpt.isEmpty()) {
+                log.warn("No shopping cart found for user: {}", user.getEmail());
+                throw new IllegalStateException("Shopping cart not found");
             }
             
             ShopingCart cart = cartOpt.get();
+            if (cart.getItems().isEmpty()) {
+                log.warn("Shopping cart is empty for user: {}", user.getEmail());
+                throw new IllegalStateException("Shopping cart is empty");
+            }
             
             // Create new order
             Order order = new Order();
@@ -192,11 +230,28 @@ public class CheckoutServiceImplementation implements CheckoutServiceInterface {
     @Transactional
     public Payment processPayment(Order order, CheckoutRequest checkoutRequest) {
         try {
+            log.info("Processing payment for order: {} with method: {}", 
+                    order.getOrderNumber(), checkoutRequest.getPaymentMethod());
+            
+            // Validate payment method
+            if (!checkoutRequest.isPaymentDetailsValid()) {
+                log.error("Invalid payment details for order: {}", order.getOrderNumber());
+                throw new IllegalArgumentException("Invalid payment details");
+            }
+            
             Payment payment = new Payment();
             payment.setOrder(order);
             payment.setUser(order.getUser());
             payment.setAmount(order.getTotalAmount());
-            payment.setPaymentMethod(Payment.PaymentMethod.valueOf(checkoutRequest.getPaymentMethod().toUpperCase()));
+            
+            try {
+                payment.setPaymentMethod(Payment.PaymentMethod.valueOf(checkoutRequest.getPaymentMethod().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                log.error("Invalid payment method: {} for order: {}", 
+                         checkoutRequest.getPaymentMethod(), order.getOrderNumber());
+                throw new IllegalArgumentException("Unsupported payment method: " + checkoutRequest.getPaymentMethod());
+            }
+            
             payment.setStatus(Payment.PaymentStatus.PENDING);
             payment.setCurrency("USD");
             payment.generateTransactionId();
@@ -232,6 +287,17 @@ public class CheckoutServiceImplementation implements CheckoutServiceInterface {
     @Transactional
     public Invoice generateInvoice(Order order) {
         try {
+            log.info("Generating invoice for order: {}", order.getOrderNumber());
+            
+            if (order == null) {
+                log.error("Cannot generate invoice: order is null");
+                throw new IllegalArgumentException("Order cannot be null");
+            }
+            
+            if (order.getPaymentStatus() != Order.PaymentStatus.PAID) {
+                log.warn("Generating invoice for unpaid order: {}", order.getOrderNumber());
+            }
+            
             Invoice invoice = new Invoice();
             invoice.setOrder(order);
             invoice.setUser(order.getUser());
@@ -295,8 +361,18 @@ public class CheckoutServiceImplementation implements CheckoutServiceInterface {
         }
         
         // Validate terms agreement
-        if (!checkoutRequest.getAgreeToTerms()) {
+        if (!checkoutRequest.isTermsAccepted()) {
             errors.add("You must agree to the terms and conditions");
+        }
+        
+        // Validate shipping address
+        if (!checkoutRequest.hasValidShippingAddress()) {
+            errors.add("Please provide a complete shipping address");
+        }
+        
+        // Validate billing address
+        if (!checkoutRequest.hasValidBillingAddress()) {
+            errors.add("Please provide a complete billing address");
         }
         
         return errors;
@@ -409,7 +485,6 @@ public class CheckoutServiceImplementation implements CheckoutServiceInterface {
         return orderRepository.save(order);
     }
     
-    @Override
     @Transactional
     public Payment refundOrder(Order order, Double amount, String reason) {
         Double refundAmount = amount != null ? amount : order.getTotalAmount();

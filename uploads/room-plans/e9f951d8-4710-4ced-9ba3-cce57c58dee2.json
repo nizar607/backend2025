@@ -1,0 +1,376 @@
+{
+  "unit": "cm",
+  "layers": {
+    "layer-1": {
+      "id": "layer-1",
+      "altitude": 0,
+      "order": 0,
+      "opacity": 1,
+      "name": "default",
+      "visible": true,
+      "vertices": {
+        "VHVanGwjLlq": {
+          "id": "VHVanGwjLlq",
+          "type": "",
+          "prototype": "vertices",
+          "name": "Vertex",
+          "misc": {},
+          "selected": false,
+          "properties": {},
+          "visible": true,
+          "x": 109,
+          "y": 1831,
+          "lines": [
+            "o6Uo_1pOW6",
+            "o1WNjl0WAl"
+          ],
+          "areas": []
+        },
+        "TmDpEexIAVN": {
+          "id": "TmDpEexIAVN",
+          "type": "",
+          "prototype": "vertices",
+          "name": "Vertex",
+          "misc": {},
+          "selected": false,
+          "properties": {},
+          "visible": true,
+          "x": 825,
+          "y": 1831,
+          "lines": [
+            "uALEf0VgaYX",
+            "PCT-94Go4U6"
+          ],
+          "areas": []
+        },
+        "nhmTUrc3J_a": {
+          "id": "nhmTUrc3J_a",
+          "type": "",
+          "prototype": "vertices",
+          "name": "Vertex",
+          "misc": {},
+          "selected": false,
+          "properties": {},
+          "visible": true,
+          "x": 825,
+          "y": 1400,
+          "lines": [
+            "uALEf0VgaYX",
+            "lK-p1REWU3"
+          ],
+          "areas": []
+        },
+        "ddBuiTYmqWa": {
+          "id": "ddBuiTYmqWa",
+          "type": "",
+          "prototype": "vertices",
+          "name": "Vertex",
+          "misc": {},
+          "selected": false,
+          "properties": {},
+          "visible": true,
+          "x": 109,
+          "y": 1400,
+          "lines": [
+            "lK-p1REWU3",
+            "o6Uo_1pOW6"
+          ],
+          "areas": []
+        },
+        "rTf50KE1Lbd": {
+          "id": "rTf50KE1Lbd",
+          "type": "",
+          "prototype": "vertices",
+          "name": "Vertex",
+          "misc": {},
+          "selected": false,
+          "properties": {},
+          "visible": true,
+          "x": 146,
+          "y": 1831,
+          "lines": [
+            "o1WNjl0WAl",
+            "KUcDreFM4r-"
+          ],
+          "areas": []
+        },
+        "PQRKdlD_fXF": {
+          "id": "PQRKdlD_fXF",
+          "type": "",
+          "prototype": "vertices",
+          "name": "Vertex",
+          "misc": {},
+          "selected": false,
+          "properties": {},
+          "visible": true,
+          "x": 168,
+          "y": 1831,
+          "lines": [
+            "KUcDreFM4r-",
+            "PCT-94Go4U6"
+          ],
+          "areas": []
+        }
+      },
+      "lines": {
+        "o6Uo_1pOW6": {
+          "id": "o6Uo_1pOW6",
+          "type": "wall",
+          "prototype": "lines",
+          "name": "Wall",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "height": {
+              "length": 300
+            },
+            "thickness": {
+              "length": 20
+            },
+            "textureA": "bricks",
+            "textureB": "bricks"
+          },
+          "visible": true,
+          "vertices": [
+            "ddBuiTYmqWa",
+            "VHVanGwjLlq"
+          ],
+          "holes": []
+        },
+        "uALEf0VgaYX": {
+          "id": "uALEf0VgaYX",
+          "type": "wall",
+          "prototype": "lines",
+          "name": "Wall",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "height": {
+              "length": 300
+            },
+            "thickness": {
+              "length": 20
+            },
+            "textureA": "bricks",
+            "textureB": "bricks"
+          },
+          "visible": true,
+          "vertices": [
+            "nhmTUrc3J_a",
+            "TmDpEexIAVN"
+          ],
+          "holes": []
+        },
+        "lK-p1REWU3": {
+          "id": "lK-p1REWU3",
+          "type": "wall",
+          "prototype": "lines",
+          "name": "Wall",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "height": {
+              "length": 300
+            },
+            "thickness": {
+              "length": 20
+            },
+            "textureA": "bricks",
+            "textureB": "bricks"
+          },
+          "visible": true,
+          "vertices": [
+            "ddBuiTYmqWa",
+            "nhmTUrc3J_a"
+          ],
+          "holes": []
+        },
+        "o1WNjl0WAl": {
+          "id": "o1WNjl0WAl",
+          "type": "wall",
+          "prototype": "lines",
+          "name": "Wall",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "height": {
+              "length": 300
+            },
+            "thickness": {
+              "length": 20
+            },
+            "textureA": "bricks",
+            "textureB": "bricks"
+          },
+          "visible": true,
+          "vertices": [
+            "VHVanGwjLlq",
+            "rTf50KE1Lbd"
+          ],
+          "holes": []
+        },
+        "KUcDreFM4r-": {
+          "id": "KUcDreFM4r-",
+          "type": "wall",
+          "prototype": "lines",
+          "name": "Wall",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "height": {
+              "length": 300
+            },
+            "thickness": {
+              "length": 20
+            },
+            "textureA": "bricks",
+            "textureB": "bricks"
+          },
+          "visible": true,
+          "vertices": [
+            "rTf50KE1Lbd",
+            "PQRKdlD_fXF"
+          ],
+          "holes": []
+        },
+        "PCT-94Go4U6": {
+          "id": "PCT-94Go4U6",
+          "type": "wall",
+          "prototype": "lines",
+          "name": "Wall",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "height": {
+              "length": 300
+            },
+            "thickness": {
+              "length": 20
+            },
+            "textureA": "bricks",
+            "textureB": "bricks"
+          },
+          "visible": true,
+          "vertices": [
+            "PQRKdlD_fXF",
+            "TmDpEexIAVN"
+          ],
+          "holes": []
+        }
+      },
+      "holes": {},
+      "areas": {
+        "nyjXYa0ysne": {
+          "id": "nyjXYa0ysne",
+          "type": "area",
+          "prototype": "areas",
+          "name": "Area",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "patternColor": "#F5F4F4",
+            "thickness": {
+              "length": 0
+            },
+            "texture": "none"
+          },
+          "visible": true,
+          "vertices": [
+            "rTf50KE1Lbd",
+            "VHVanGwjLlq",
+            "ddBuiTYmqWa",
+            "nhmTUrc3J_a",
+            "TmDpEexIAVN",
+            "PQRKdlD_fXF"
+          ],
+          "holes": []
+        }
+      },
+      "items": {
+        "zfS1rhjXta": {
+          "id": "zfS1rhjXta",
+          "type": "bench",
+          "prototype": "items",
+          "name": "Bench",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "altitude": {
+              "length": 0,
+              "unit": "cm"
+            }
+          },
+          "visible": true,
+          "x": 196,
+          "y": 1790,
+          "rotation": 0
+        },
+        "qJlfyBAFgg": {
+          "id": "qJlfyBAFgg",
+          "type": "sedia",
+          "prototype": "items",
+          "name": "Chair",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "altitude": {
+              "length": 0,
+              "unit": "cm"
+            }
+          },
+          "visible": true,
+          "x": 776,
+          "y": 1784,
+          "rotation": 0
+        }
+      },
+      "selected": {
+        "vertices": [],
+        "lines": [],
+        "holes": [],
+        "areas": [],
+        "items": []
+      }
+    }
+  },
+  "grids": {
+    "h1": {
+      "id": "h1",
+      "type": "horizontal-streak",
+      "properties": {
+        "step": 20,
+        "colors": [
+          "#808080",
+          "#ddd",
+          "#ddd",
+          "#ddd",
+          "#ddd"
+        ]
+      }
+    },
+    "v1": {
+      "id": "v1",
+      "type": "vertical-streak",
+      "properties": {
+        "step": 20,
+        "colors": [
+          "#808080",
+          "#ddd",
+          "#ddd",
+          "#ddd",
+          "#ddd"
+        ]
+      }
+    }
+  },
+  "selectedLayer": "layer-1",
+  "groups": {},
+  "width": 3000,
+  "height": 2000,
+  "meta": {},
+  "guides": {
+    "horizontal": {},
+    "vertical": {},
+    "circular": {}
+  }
+}

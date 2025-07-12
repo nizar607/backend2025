@@ -1,8 +1,6 @@
 package com.example.stage24.user.service.implementation;
 
-
 import com.example.stage24.security.jwt.JwtUtils;
-
 
 import com.example.stage24.security.services.RefreshTokenService;
 import com.example.stage24.security.services.UserDetailsImpl;
@@ -10,12 +8,16 @@ import com.example.stage24.user.domain.RefreshToken;
 import com.example.stage24.user.domain.Role;
 import com.example.stage24.user.domain.RoleType;
 import com.example.stage24.user.domain.User;
+import com.example.stage24.user.domain.User;
+import com.example.stage24.user.domain.Access;
+import com.example.stage24.user.domain.AccessType;
 import com.example.stage24.user.model.request.LoginRequest;
 import com.example.stage24.user.model.request.SignupRequest;
 import com.example.stage24.user.model.request.TokenRefreshRequest;
-import com.example.stage24.user.model.response.DataResponse;
 import com.example.stage24.user.model.response.LoginResponse;
 import com.example.stage24.user.model.response.TokenRefreshResponse;
+import com.example.stage24.user.repository.AccessRepository;
+import com.example.stage24.user.model.response.DataResponse;
 import com.example.stage24.user.repository.RoleRepository;
 import com.example.stage24.user.repository.UserRepository;
 import com.example.stage24.user.service.interfaces.IUserService;
@@ -37,7 +39,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 @Service
 @Slf4j
 @AllArgsConstructor
@@ -49,21 +50,21 @@ public class UserServiceImpl implements IUserService {
 
     RoleRepository roleRepository;
 
+    AccessRepository accessRepository;
+
     PasswordEncoder encoder;
 
     RefreshTokenService refreshTokenService;
 
     JwtUtils jwtUtils;
 
-
-
     @Override
     public LoginResponse authenticateUser(LoginRequest loginRequest) {
         try {
 
-
             Authentication authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+                    .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),
+                            loginRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -76,29 +77,29 @@ public class UserServiceImpl implements IUserService {
 
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
-            User user = userRepository.findByEmail(userDetails.getEmail()).orElseThrow(() -> new RuntimeException("User Not Found with username: " + userDetails.getUsername()));
-		/*
-		private String token;
-		private String type = "Bearer";
-		private String id;
-		private String username;
-		private String email;
-		private String refreshToken;
-		private List<String> roles;
+            User user = userRepository.findByEmail(userDetails.getEmail()).orElseThrow(
+                    () -> new RuntimeException("User Not Found with username: " + userDetails.getUsername()));
+            /*
+             * private String token;
+             * private String type = "Bearer";
+             * private String id;
+             * private String username;
+             * private String email;
+             * private String refreshToken;
+             * private List<String> roles;
+             * 
+             * 
+             * 
+             * public class LoginResponse {
+             * private String status;
+             * private String token;
+             * private DataResponse data;
+             * }
+             * 
+             */
 
-
-
-		public class LoginResponse {
-        private String status;
-        private String token;
-        private DataResponse data;
-}
-
-		*/
-
-        ArrayList<String> _roles = new ArrayList<>();
-        _roles.add("ROLE_ADMIN");
-
+            ArrayList<String> _roles = new ArrayList<>();
+            _roles.add("ROLE_ADMIN");
 
             return new LoginResponse(
                     "success",
@@ -111,8 +112,8 @@ public class UserServiceImpl implements IUserService {
                             user.getEmail(),
                             refreshToken.getToken(),
                             user.getRoles().stream().map((role) -> role.getName().name()).collect(Collectors.toList()),
-                            user.getAccesses().stream().map((access) -> access.getType().name()).collect(Collectors.toList())
-                    ));
+                            user.getAccesses().stream().map((access) -> access.getType().name())
+                                    .collect(Collectors.toList())));
         } catch (Exception e) {
             return new LoginResponse(
                     "failed",
@@ -158,7 +159,6 @@ public class UserServiceImpl implements IUserService {
         Set<String> strRoles = signUpRequest.getRoles();
         List<Role> roles = new LinkedList();
 
-
         strRoles.forEach(role -> {
             switch (role) {
                 case "ROLE_ADMIN":
@@ -166,6 +166,11 @@ public class UserServiceImpl implements IUserService {
                     Role adminRole = roleRepository.findByName(RoleType.ROLE_ADMIN)
                             .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                     roles.add(adminRole);
+
+                    // Assign all accesses to admin users
+                    List<Access> allAccesses = accessRepository.findAll();
+                    user.setAccesses(allAccesses);
+                    log.info("Assigned {} accesses to admin user", allAccesses.size());
 
                     break;
 
@@ -198,9 +203,6 @@ public class UserServiceImpl implements IUserService {
         return userRepository.save(user);
 
     }
-
-
-
 
     @Override
     public Role addRole(Role role) {

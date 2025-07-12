@@ -15,6 +15,8 @@ public interface ShopingCartServiceInterface {
     
     Optional<ShopingCart> removeItemFromCart(Long itemId);
     
+    Optional<ShopingCart> removeItemByArticleId(Long articleId);
+    
     Optional<ShopingCart> updateItemQuantity(Long itemId, int quantity);
     
     Optional<ShopingCart> clearCart();

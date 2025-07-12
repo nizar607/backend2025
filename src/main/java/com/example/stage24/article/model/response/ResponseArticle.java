@@ -32,6 +32,8 @@ public class ResponseArticle {
 
     private boolean isFavorite;
 
+    private boolean isInCart;
+
     private double averageRating = 0;
 
     public ResponseArticle(Article article) {
@@ -75,6 +77,22 @@ public class ResponseArticle {
         this.updatedAt = article.getUpdatedAt();
         this.createdAt = article.getCreatedAt();
         this.isFavorite = isFavorite;
+        this.isInCart = false; // Default value
+    }
+
+    public ResponseArticle(Article article, boolean isFavorite, boolean isInCart) {
+        this.id = article.getId();
+        this.name = article.getName();
+        this.description = article.getDescription();
+        this.price = article.getPrice();
+        this.category = article.getCategory().getId();
+        this.categoryName = article.getCategory().getName();
+        this.quantity = article.getQuantity();
+        this.image = article.getImage();
+        this.updatedAt = article.getUpdatedAt();
+        this.createdAt = article.getCreatedAt();
+        this.isFavorite = isFavorite;
+        this.isInCart = isInCart;
     }
 
 }

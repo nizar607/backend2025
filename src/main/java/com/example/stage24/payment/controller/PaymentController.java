@@ -3,9 +3,15 @@ package com.example.stage24.payment.controller;
 import com.example.stage24.order.domain.Order;
 import com.example.stage24.order.repository.OrderRepository;
 import com.example.stage24.payment.domain.Payment;
+import com.example.stage24.payment.dto.CashPaymentRequest;
+import com.example.stage24.payment.dto.PaymentConfirmRequest;
+import com.example.stage24.payment.dto.PaymentIntentRequest;
 import com.example.stage24.payment.service.StripePaymentService;
 import com.stripe.exception.StripeException;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,24 +20,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/payments")
-@CrossOrigin(origins = "*")
 public class PaymentController {
 
-    @Autowired
     private StripePaymentService stripePaymentService;
 
-    @Autowired
     private OrderRepository orderRepository;
 
     /**
      * Create Stripe payment intent
      */
     @PostMapping("/stripe/create-intent")
-    public ResponseEntity<?> createStripePaymentIntent(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> createStripePaymentIntent(@Valid @RequestBody PaymentIntentRequest request) {
         try {
-            Long orderId = Long.valueOf(request.get("orderId").toString());
-            String customerEmail = request.get("customerEmail").toString();
+            Long orderId = request.getOrderId();
+            String customerEmail = request.getCustomerEmail();
 
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -54,9 +58,9 @@ public class PaymentController {
      * Confirm Stripe payment
      */
     @PostMapping("/stripe/confirm")
-    public ResponseEntity<?> confirmStripePayment(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> confirmStripePayment(@Valid @RequestBody PaymentConfirmRequest request) {
         try {
-            String paymentIntentId = request.get("paymentIntentId");
+            String paymentIntentId = request.getPaymentIntentId();
             
             boolean success = stripePaymentService.confirmPayment(paymentIntentId);
             
@@ -76,9 +80,9 @@ public class PaymentController {
      * Process cash payment (creates pending payment)
      */
     @PostMapping("/cash/create")
-    public ResponseEntity<?> createCashPayment(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> createCashPayment(@Valid @RequestBody CashPaymentRequest request) {
         try {
-            Long orderId = Long.valueOf(request.get("orderId").toString());
+            Long orderId = request.getOrderId();
 
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -124,16 +128,25 @@ public class PaymentController {
      */
     @GetMapping("/test-cards")
     public ResponseEntity<?> getTestCards() {
+        System.out.println("working here");
         Map<String, String> testCards = stripePaymentService.getTestCards();
         
         Map<String, Object> response = new HashMap<>();
         response.put("testCards", testCards);
         response.put("instructions", Map.of(
-            "expiry", "Use any future date (e.g., 12/25)",
-            "cvc", "Use any 3-digit number (e.g., 123)",
-            "zip", "Use any 5-digit number (e.g., 12345)"
+            "expiry", "12/25",
+            "cvc", "123",
+            "zip", "12345"
         ));
         
+        return ResponseEntity.ok(response);
+    }
+
+    //hello world get
+    @GetMapping("/hello")
+    public ResponseEntity<?> getHello() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "hello world");
         return ResponseEntity.ok(response);
     }
 

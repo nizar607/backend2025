@@ -1,7 +1,7 @@
 package com.example.stage24.checkout.service.interfaces;
 
-import com.example.stage24.checkout.dto.CheckoutRequest;
-import com.example.stage24.checkout.dto.CheckoutResponse;
+import com.example.stage24.checkout.models.CheckoutRequest;
+import com.example.stage24.checkout.models.CheckoutResponse;
 import com.example.stage24.invoice.domain.Invoice;
 import com.example.stage24.order.domain.Order;
 import com.example.stage24.payment.domain.Payment;

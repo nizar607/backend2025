@@ -124,7 +124,7 @@ public class ArticleController {
     @GetMapping("/{id}")
     public ResponseEntity<ResponseArticle> getArticleById(@PathVariable("id") Long id) {
 
-        return articleService.getArticleResponse(id)
+        return articleService.getArticleResponseWithFavorite(id)
                 .map(article -> new ResponseEntity<>(article, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }

@@ -57,9 +57,6 @@ public class ShopingCartServiceImplementation implements ShopingCartServiceInter
             } else {
                 // Create new item
                 Item newItem = new Item();
-                newItem.setName(article.getName());
-                newItem.setDescription(article.getDescription());
-                newItem.setPrice(article.getPrice());
                 newItem.setQuantity(quantity);
                 newItem.setArticle(article);
                 newItem.setShopingCart(cart);
@@ -163,6 +160,47 @@ public class ShopingCartServiceImplementation implements ShopingCartServiceInter
     }
 
     @Override
+    public Optional<ShopingCart> removeItemByArticleId(Long articleId) {
+        try {
+            log.info("Starting remove item operation for article ID: {}", articleId);
+            User user = sharedService.getConnectedUser()
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated"));
+
+            log.info("User authenticated: {}", user.getId());
+            ShopingCart cart = shopingCartRepository.findByUser(user)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cart not found"));
+
+            // Get the article
+            Article article = articleRepository.findById(articleId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Article not found"));
+
+            // Find the item by article and cart
+            Optional<Item> itemToRemove = itemRepository.findByArticleAndShopingCart(article, cart);
+            
+            if (itemToRemove.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item not found in cart");
+            }
+
+            log.info("Deleting item from database: {}", itemToRemove.get().getId());
+            itemRepository.delete(itemToRemove.get());
+            
+            // Remove the item from the cart's collection
+            cart.getItems().removeIf(i -> i.getArticle().getId().equals(articleId));
+
+            log.info("Updating cart totals");
+            updateCartTotals(cart);
+
+            ShopingCart savedCart = shopingCartRepository.save(cart);
+            log.info("Item removed and cart updated successfully");
+            return Optional.of(savedCart);
+
+        } catch (Exception e) {
+            log.error("Failed to remove item from cart: {}", e.getMessage(), e);
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public Optional<ShopingCart> updateItemQuantity(Long itemId, int quantity) {
         try {
             User user = sharedService.getConnectedUser()
@@ -234,7 +272,7 @@ public class ShopingCartServiceImplementation implements ShopingCartServiceInter
         List<Item> items = itemRepository.findByShopingCart(cart);
 
         double subTotal = items.stream()
-                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .mapToDouble(item -> item.getArticle().getPrice() * item.getQuantity())
                 .sum();
 
         int totalQuantity = items.stream()

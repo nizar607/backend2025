@@ -70,8 +70,22 @@ public class SharedServiceImplementation implements SharedServiceInterface {
     @Override
     public Optional<User> getConnectedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = ((UserDetails) authentication.getPrincipal()).getUsername();
-        return userRepository.findByEmail(currentUsername);
+        
+        if (authentication == null || !authentication.isAuthenticated() || 
+            "anonymousUser".equals(authentication.getPrincipal())) {
+            return Optional.empty();
+        }
+        
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetails) {
+            String currentUsername = ((UserDetails) principal).getUsername();
+            return userRepository.findByEmail(currentUsername);
+        } else if (principal instanceof String) {
+            // Handle case where principal is a username string
+            return userRepository.findByEmail((String) principal);
+        }
+        
+        return Optional.empty();
     }
 }
 

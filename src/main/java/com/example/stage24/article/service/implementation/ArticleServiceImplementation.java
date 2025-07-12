@@ -6,6 +6,7 @@ import com.example.stage24.article.model.request.NewArticle;
 import com.example.stage24.article.model.response.ResponseArticle;
 import com.example.stage24.article.repository.CategoryRepository;
 import com.example.stage24.article.service.interfaces.CategoryServiceInterface;
+import com.example.stage24.basket.repository.ItemRepository;
 import com.example.stage24.favorite.repository.FavoriteRepository;
 import com.example.stage24.user.domain.User;
 import com.example.stage24.user.repository.UserRepository;
@@ -26,6 +27,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +42,7 @@ public class ArticleServiceImplementation implements ArticleServiceInterface {
     private FavoriteRepository favoriteRepository;
     private NotificationService notificationService;
     private ReviewRepository reviewRepository;
+    private ItemRepository itemRepository;
 
     @Override
     public Article addArticle(NewArticle article) {
@@ -173,27 +176,49 @@ public class ArticleServiceImplementation implements ArticleServiceInterface {
         return favoriteRepository.findByUserAndArticleId(user, articleId).isPresent();
     }
 
+    // Helper method to check if an article is in user's cart
+    private boolean isArticleInCart(Long articleId, Set<Long> cartArticleIds) {
+        return cartArticleIds.contains(articleId);
+    }
+
     @Override
     public Optional<ResponseArticle> getArticleResponseWithFavorite(Long id) {
+        User user = sharedService.getConnectedUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Set<Long> cartArticleIds = itemRepository.findArticleIdsByUserId(user.getId());
+        
         Article article = articleRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Article not found"));
         boolean isFavorite = isArticleFavorited(id);
-        return Optional.of(new ResponseArticle(article, isFavorite));
+        boolean isInCart = isArticleInCart(id, cartArticleIds);
+        return Optional.of(new ResponseArticle(article, isFavorite, isInCart));
     }
 
     @Override
     public List<ResponseArticle> getAllArticlesResponseWithFavorite() {
+        User user = sharedService.getConnectedUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Set<Long> cartArticleIds = itemRepository.findArticleIdsByUserId(user.getId());
+        
         return articleRepository.findAll().stream()
-                .map(article -> new ResponseArticle(article, isArticleFavorited(article.getId())))
+                .map(article -> new ResponseArticle(article, 
+                    isArticleFavorited(article.getId()),
+                    isArticleInCart(article.getId(), cartArticleIds)))
                 .collect(Collectors.toList());
     }
 
     @Override
     public Optional<List<ResponseArticle>> getArticleByNameResponseWithFavorite(String name) {
+        User user = sharedService.getConnectedUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Set<Long> cartArticleIds = itemRepository.findArticleIdsByUserId(user.getId());
+        
         List<Article> articles = articleRepository.findArticleByNameLike("%" + name + "%")
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Article not found"));
         List<ResponseArticle> articleResponses = articles.stream()
-                .map(article -> new ResponseArticle(article, isArticleFavorited(article.getId())))
+                .map(article -> new ResponseArticle(article, 
+                    isArticleFavorited(article.getId()),
+                    isArticleInCart(article.getId(), cartArticleIds)))
                 .toList();
         return Optional.of(articleResponses);
     }

@@ -1,0 +1,292 @@
+{
+  "unit": "cm",
+  "layers": {
+    "layer-1": {
+      "id": "layer-1",
+      "altitude": 0,
+      "order": 0,
+      "opacity": 1,
+      "name": "default",
+      "visible": true,
+      "vertices": {
+        "SIqWHLUWdlAW": {
+          "id": "SIqWHLUWdlAW",
+          "type": "",
+          "prototype": "vertices",
+          "name": "Vertex",
+          "misc": {},
+          "selected": false,
+          "properties": {},
+          "visible": true,
+          "x": 454.59502731211074,
+          "y": 1785.8406479563007,
+          "lines": [
+            "XQn37aCIlpll",
+            "950VbTjVTz"
+          ],
+          "areas": []
+        },
+        "7Jj8ptU5XhJe": {
+          "id": "7Jj8ptU5XhJe",
+          "type": "",
+          "prototype": "vertices",
+          "name": "Vertex",
+          "misc": {},
+          "selected": false,
+          "properties": {},
+          "visible": true,
+          "x": 1083.527029572424,
+          "y": 1785.8406479563007,
+          "lines": [
+            "XQn37aCIlpll",
+            "nQfy3545aUj"
+          ],
+          "areas": []
+        },
+        "lH-pL0nW_Gw": {
+          "id": "lH-pL0nW_Gw",
+          "type": "",
+          "prototype": "vertices",
+          "name": "Vertex",
+          "misc": {},
+          "selected": false,
+          "properties": {},
+          "visible": true,
+          "x": 1098.5016010548122,
+          "y": 1402.4916180071573,
+          "lines": [
+            "nQfy3545aUj",
+            "r8hhw9MyQMZ5"
+          ],
+          "areas": []
+        },
+        "0tVt0HF-Oj_J": {
+          "id": "0tVt0HF-Oj_J",
+          "type": "",
+          "prototype": "vertices",
+          "name": "Vertex",
+          "misc": {},
+          "selected": false,
+          "properties": {},
+          "visible": true,
+          "x": 394.6967413825571,
+          "y": 1402.4916180071573,
+          "lines": [
+            "r8hhw9MyQMZ5",
+            "950VbTjVTz"
+          ],
+          "areas": []
+        }
+      },
+      "lines": {
+        "XQn37aCIlpll": {
+          "id": "XQn37aCIlpll",
+          "type": "wall",
+          "prototype": "lines",
+          "name": "Wall",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "height": {
+              "length": 300
+            },
+            "thickness": {
+              "length": 20
+            },
+            "textureA": "bricks",
+            "textureB": "bricks"
+          },
+          "visible": true,
+          "vertices": [
+            "SIqWHLUWdlAW",
+            "7Jj8ptU5XhJe"
+          ],
+          "holes": []
+        },
+        "nQfy3545aUj": {
+          "id": "nQfy3545aUj",
+          "type": "wall",
+          "prototype": "lines",
+          "name": "Wall",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "height": {
+              "length": 300
+            },
+            "thickness": {
+              "length": 20
+            },
+            "textureA": "bricks",
+            "textureB": "bricks"
+          },
+          "visible": true,
+          "vertices": [
+            "7Jj8ptU5XhJe",
+            "lH-pL0nW_Gw"
+          ],
+          "holes": []
+        },
+        "r8hhw9MyQMZ5": {
+          "id": "r8hhw9MyQMZ5",
+          "type": "wall",
+          "prototype": "lines",
+          "name": "Wall",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "height": {
+              "length": 300
+            },
+            "thickness": {
+              "length": 20
+            },
+            "textureA": "bricks",
+            "textureB": "bricks"
+          },
+          "visible": true,
+          "vertices": [
+            "0tVt0HF-Oj_J",
+            "lH-pL0nW_Gw"
+          ],
+          "holes": []
+        },
+        "950VbTjVTz": {
+          "id": "950VbTjVTz",
+          "type": "wall",
+          "prototype": "lines",
+          "name": "Wall",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "height": {
+              "length": 300
+            },
+            "thickness": {
+              "length": 20
+            },
+            "textureA": "bricks",
+            "textureB": "bricks"
+          },
+          "visible": true,
+          "vertices": [
+            "0tVt0HF-Oj_J",
+            "SIqWHLUWdlAW"
+          ],
+          "holes": []
+        }
+      },
+      "holes": {},
+      "areas": {
+        "9ExAZz4d0f0": {
+          "id": "9ExAZz4d0f0",
+          "type": "area",
+          "prototype": "areas",
+          "name": "Area",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "patternColor": "#F5F4F4",
+            "thickness": {
+              "length": 0
+            },
+            "texture": "none"
+          },
+          "visible": true,
+          "vertices": [
+            "SIqWHLUWdlAW",
+            "0tVt0HF-Oj_J",
+            "lH-pL0nW_Gw",
+            "7Jj8ptU5XhJe"
+          ],
+          "holes": []
+        }
+      },
+      "items": {
+        "raF_PQjsgD": {
+          "id": "raF_PQjsgD",
+          "type": "sedia",
+          "prototype": "items",
+          "name": "Chair",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "altitude": {
+              "length": 0,
+              "unit": "cm"
+            }
+          },
+          "visible": true,
+          "x": 527.4712751930676,
+          "y": 1706.9745714823885,
+          "rotation": 0
+        },
+        "gOXeoQ2DWH": {
+          "id": "gOXeoQ2DWH",
+          "type": "double school desk",
+          "prototype": "items",
+          "name": "Double school desk",
+          "misc": {},
+          "selected": false,
+          "properties": {
+            "altitude": {
+              "length": 0,
+              "unit": "cm"
+            }
+          },
+          "visible": true,
+          "x": 958.7389338858538,
+          "y": 1672.0339046901488,
+          "rotation": 0
+        }
+      },
+      "selected": {
+        "vertices": [],
+        "lines": [],
+        "holes": [],
+        "areas": [],
+        "items": []
+      }
+    }
+  },
+  "grids": {
+    "h1": {
+      "id": "h1",
+      "type": "horizontal-streak",
+      "properties": {
+        "step": 20,
+        "colors": [
+          "#808080",
+          "#ddd",
+          "#ddd",
+          "#ddd",
+          "#ddd"
+        ]
+      }
+    },
+    "v1": {
+      "id": "v1",
+      "type": "vertical-streak",
+      "properties": {
+        "step": 20,
+        "colors": [
+          "#808080",
+          "#ddd",
+          "#ddd",
+          "#ddd",
+          "#ddd"
+        ]
+      }
+    }
+  },
+  "selectedLayer": "layer-1",
+  "groups": {},
+  "width": 3000,
+  "height": 2000,
+  "meta": {},
+  "guides": {
+    "horizontal": {},
+    "vertical": {},
+    "circular": {}
+  }
+}

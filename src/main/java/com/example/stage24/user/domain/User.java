@@ -5,6 +5,9 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.*;
+
+import com.example.stage24.company.model.Company;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 @Data
 @AllArgsConstructor
@@ -70,6 +73,10 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL)
     private List<User> createdUsers = new LinkedList<>();
+
+    @ManyToOne 
+    @JsonBackReference
+    private Company company;
 
     @NotNull
     private LocalDateTime createdAt = LocalDateTime.now();

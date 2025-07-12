@@ -38,7 +38,7 @@ public class ShopingCart {
     private double totalAmount;
 
     
-    @OneToMany(mappedBy = "shopingCart", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "shopingCart", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items;
 
     @JsonIgnore
