@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -101,7 +102,7 @@ public class FavoriteController {
         try {
             Optional<List<ArticleInfo>> articles = favoriteService.getFavoriteArticlesByUser();
             return articles.map(articleInfos -> ResponseEntity.ok(articleInfos))
-                    .orElse(ResponseEntity.notFound().build());
+                    .orElse(ResponseEntity.ok(Collections.emptyList()));
         } catch (RuntimeException e) {
             log.error("Error fetching favorite articles: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

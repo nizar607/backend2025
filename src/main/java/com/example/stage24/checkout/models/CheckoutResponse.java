@@ -86,6 +86,11 @@ public class CheckoutResponse {
     
     private String trackingUrl;
     
+    // Stripe payment flow information
+    private Boolean requiresPaymentConfirmation;
+    private String stripeClientSecret;
+    private String stripePaymentIntentId;
+    
     // Discount Information
     private String discountCode;
     

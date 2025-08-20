@@ -51,6 +51,7 @@ public class AboutUsDTO {
         private Long id;
         private String title;
         private String description;
+        private String icon;
         private Integer displayOrder;
     }
 

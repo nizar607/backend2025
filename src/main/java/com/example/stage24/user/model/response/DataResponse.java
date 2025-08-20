@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
 import java.util.List;
 
@@ -22,7 +21,9 @@ public class DataResponse {
     private String refreshToken;
     private List<String> roles;
     private List<String> accesses;
-    private long companyId;
+    private boolean hasCompany;
+    private boolean hasAboutUs;
+
 
     public DataResponse(String type, String firstName, String lastName, String email, String refreshToken,
             List<String> roles, List<String> accesses) {

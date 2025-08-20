@@ -5,6 +5,7 @@ import com.example.stage24.company.repository.CompanyRepository;
 import com.example.stage24.homepage.dto.AboutUsDTO;
 import com.example.stage24.homepage.model.*;
 import com.example.stage24.homepage.repository.AboutUsRepository;
+import com.example.stage24.shared.FileStorageService;
 import com.example.stage24.shared.SharedServiceInterface;
 import com.example.stage24.user.domain.User;
 import com.example.stage24.user.repository.UserRepository;
@@ -12,8 +13,10 @@ import com.example.stage24.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -25,12 +28,15 @@ public class AboutUsServiceImpl implements AboutUsService {
     private final AboutUsRepository aboutUsRepository;
     private final SharedServiceInterface sharedService;
     private final CompanyRepository companyRepository;
+    private final FileStorageService fileService;
 
     @Override
     public AboutUsDTO getAboutUsByConnectedUser() {
         User user = sharedService.getConnectedUser().orElseThrow(() -> new RuntimeException("User not found"));
-        Company company = companyRepository.findByUsersContaining(user).orElseThrow(() -> new RuntimeException("company by connected user not found"));
-        AboutUs aboutUs = aboutUsRepository.findByCompanyId(company.getId()).orElseThrow(() -> new RuntimeException("about us by connected user not found"));
+        Company company = companyRepository.findByUsersContaining(user)
+                .orElseThrow(() -> new RuntimeException("company by connected user not found"));
+        AboutUs aboutUs = aboutUsRepository.findByCompanyId(company.getId())
+                .orElseThrow(() -> new RuntimeException("about us by connected user not found"));
         return convertToDTO(aboutUs);
     }
 
@@ -189,6 +195,7 @@ public class AboutUsServiceImpl implements AboutUsService {
         dto.setTitle(companyValue.getTitle());
         dto.setDescription(companyValue.getDescription());
         dto.setDisplayOrder(companyValue.getDisplayOrder());
+        dto.setIcon(companyValue.getIcon());
         return dto;
     }
 
@@ -198,6 +205,7 @@ public class AboutUsServiceImpl implements AboutUsService {
         companyValue.setTitle(dto.getTitle());
         companyValue.setDescription(dto.getDescription());
         companyValue.setDisplayOrder(dto.getDisplayOrder());
+        companyValue.setIcon(dto.getIcon());
         companyValue.setAboutUs(aboutUs);
         return companyValue;
     }
@@ -244,51 +252,71 @@ public class AboutUsServiceImpl implements AboutUsService {
         return companyStatistic;
     }
 
-    /**
-     * Create or update AboutUs content based on JWT token authentication
-     * Uses the token to get the connected user and verify which company they belong
-     * to
-     * 
-     * @param aboutUsDTO the about us data to save or update
-     * @param token      the JWT token to extract user information
-     * @return saved or updated AboutUsDTO
-     * @throws RuntimeException if user not found or user has no company
-     */
-    public AboutUsDTO createOrUpdateAboutUs(AboutUsDTO aboutUsDTO) {
-        // Extract username from JWT token
+    @Override
+    public AboutUsDTO updateAboutUsContent(long id, AboutUsDTO aboutUsDTO) {
 
+        AboutUs existingAboutUs = aboutUsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("AboutUs not found for this company"));
+
+        // Preserve existing images
+        aboutUsDTO.setCoverImage(existingAboutUs.getCoverImage());
+        aboutUsDTO.setStoryImage(existingAboutUs.getStoryImage());
+
+        // Preserve team member images
+        if (aboutUsDTO.getTeamMembers() != null && existingAboutUs.getTeamMembers() != null) {
+            for (AboutUsDTO.TeamMemberDTO memberDTO : aboutUsDTO.getTeamMembers()) {
+                existingAboutUs.getTeamMembers().stream()
+                        .filter(tm -> tm.getId() != null && tm.getId().equals(memberDTO.getId()))
+                        .findFirst()
+                        .ifPresent(existingMember -> memberDTO.setImage(existingMember.getImage()));
+            }
+        }
+
+        // Update existing AboutUs
+        aboutUsDTO.setId(existingAboutUs.getId());
+        aboutUsDTO.setCompanyId(existingAboutUs.getCompanyId());
+
+        AboutUs updatedAboutUs = convertToEntity(aboutUsDTO);
+        AboutUs savedAboutUs = aboutUsRepository.save(updatedAboutUs);
+        return convertToDTO(savedAboutUs);
+    }
+
+    @Override
+    public AboutUsDTO updateAboutUsImages(
+            long id,
+            MultipartFile coverImage,
+            MultipartFile storyImage,
+            Map<Long, MultipartFile> teamMemberImages) {
         // Find user by email (username is email in this system)
-        User user = sharedService.getConnectedUser()
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Check if user belongs to a company
-        if (user.getCompany() == null) {
-            throw new RuntimeException("User is not associated with any company");
+        AboutUs existingAboutUs = aboutUsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("AboutUs not found for this company"));
+
+        // Update cover image if provided
+        if (coverImage != null && !coverImage.isEmpty()) {
+            String coverImagePath = fileService.store(coverImage);
+            existingAboutUs.setCoverImage(coverImagePath);
         }
 
-        Long companyId = user.getCompany().getId();
-
-        // Check if AboutUs already exists for this company
-        Optional<AboutUs> existingAboutUs = aboutUsRepository.findByCompanyId(companyId);
-
-        if (existingAboutUs.isPresent()) {
-            // Update existing AboutUs
-            AboutUs aboutUsToUpdate = existingAboutUs.get();
-            aboutUsDTO.setId(aboutUsToUpdate.getId());
-            aboutUsDTO.setCompanyId(companyId);
-
-            AboutUs updatedAboutUs = convertToEntity(aboutUsDTO);
-            AboutUs savedAboutUs = aboutUsRepository.save(updatedAboutUs);
-            return convertToDTO(savedAboutUs);
-        } else {
-            // Create new AboutUs
-            aboutUsDTO.setId(null); // Ensure it's a new entity
-            aboutUsDTO.setCompanyId(companyId);
-
-            AboutUs newAboutUs = convertToEntity(aboutUsDTO);
-            AboutUs savedAboutUs = aboutUsRepository.save(newAboutUs);
-            return convertToDTO(savedAboutUs);
+        // Update story image if provided
+        if (storyImage != null && !storyImage.isEmpty()) {
+            String storyImagePath = fileService.store(storyImage);
+            existingAboutUs.setStoryImage(storyImagePath);
         }
+
+        // Update team member images if provided
+        if (teamMemberImages != null && !teamMemberImages.isEmpty() && existingAboutUs.getTeamMembers() != null) {
+            for (TeamMember teamMember : existingAboutUs.getTeamMembers()) {
+                MultipartFile memberImage = teamMemberImages.get(teamMember.getId());
+                if (memberImage != null && !memberImage.isEmpty()) {
+                    String memberImagePath = fileService.store(memberImage);
+                    teamMember.setImage(memberImagePath);
+                }
+            }
+        }
+
+        AboutUs savedAboutUs = aboutUsRepository.save(existingAboutUs);
+        return convertToDTO(savedAboutUs);
     }
 
 }

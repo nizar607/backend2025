@@ -88,4 +88,11 @@ public interface CompanyService {
      * Update company logo
      */
     CompanyDTO updateCompanyLogo(Long companyId, String logoUrl);
+    
+    /**
+     * Set homepage active status - sets all homepages for a company to inactive except the specified one
+     * @param companyId the company ID
+     * @param homepageType the homepage type to set as active ("v1", "v2", or "v3")
+     */
+    void setHomepageActive(Long companyId, String homepageType);
 }

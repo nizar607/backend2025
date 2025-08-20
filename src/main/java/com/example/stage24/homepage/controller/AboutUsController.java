@@ -11,10 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -70,33 +73,51 @@ public class AboutUsController {
     }
 
     /**
-     * Create or update about us content
-     */
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('AGENT')")
-    public ResponseEntity<?> saveAboutUs(@Valid @RequestBody AboutUsDTO aboutUsDTO) {
-        try {
-            AboutUsDTO savedAboutUs = aboutUsService.saveAboutUs(aboutUsDTO);
-            return ResponseEntity.ok(savedAboutUs);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Error saving About Us content: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Update existing about us content
+     * Update about us text content only (without images)
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('AGENT')")
-    public ResponseEntity<?> updateAboutUs(@PathVariable Long id, @Valid @RequestBody AboutUsDTO aboutUsDTO) {
+    public ResponseEntity<?> updateAboutUsContent(@PathVariable long id, @Valid @RequestBody AboutUsDTO aboutUsDTO) {
         try {
-            aboutUsDTO.setId(id);
-            AboutUsDTO updatedAboutUs = aboutUsService.saveAboutUs(aboutUsDTO);
+            AboutUsDTO updatedAboutUs = aboutUsService.updateAboutUsContent(id, aboutUsDTO);
             return ResponseEntity.ok(updatedAboutUs);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Error updating About Us content: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Update about us images using multipart files
+     */
+    @PutMapping("/{id}/images")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('AGENT')")
+    public ResponseEntity<?> updateAboutUsImages(
+            @PathVariable long id,
+            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
+            @RequestParam(value = "storyImage", required = false) MultipartFile storyImage,
+            @RequestParam(value = "teamMemberImages", required = false) Map<String, MultipartFile> teamMemberImagesStr) {
+        try {
+            // Convert string keys to Long keys for team member images
+            Map<Long, MultipartFile> teamMemberImages = new HashMap<>();
+            if (teamMemberImagesStr != null) {
+                for (Map.Entry<String, MultipartFile> entry : teamMemberImagesStr.entrySet()) {
+                    try {
+                        Long teamMemberId = Long.parseLong(entry.getKey());
+                        teamMemberImages.put(teamMemberId, entry.getValue());
+                    } catch (NumberFormatException e) {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body("Invalid team member ID: " + entry.getKey());
+                    }
+                }
+            }
+
+            AboutUsDTO updatedAboutUs = aboutUsService.updateAboutUsImages(id, coverImage, storyImage,
+                    teamMemberImages);
+            return ResponseEntity.ok(updatedAboutUs);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Error updating About Us images: " + e.getMessage());
         }
     }
 

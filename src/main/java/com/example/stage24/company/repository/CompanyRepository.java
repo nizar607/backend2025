@@ -60,4 +60,16 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
      * Find company by user
      */
     Optional<Company> findByUsersContaining(User user);
+    
+    /**
+     * Check if user has a company
+     */
+    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Company c JOIN c.users u WHERE u.id = :userId")
+    boolean hasCompany(@Param("userId") Long userId);
+
+    /**
+     * Check if user's company has about us information
+     */
+    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Company c JOIN c.users u JOIN c.aboutUs a WHERE u.id = :userId")
+    boolean hasAboutUs(@Param("userId") Long userId);
 }

@@ -1,5 +1,6 @@
 package com.example.stage24.user.service.implementation;
 
+import com.example.stage24.company.repository.CompanyRepository;
 import com.example.stage24.security.jwt.JwtUtils;
 
 import com.example.stage24.security.services.RefreshTokenService;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.example.stage24.email.service.EmailService;
 
 @Service
 @Slf4j
@@ -52,11 +54,15 @@ public class UserServiceImpl implements IUserService {
 
     AccessRepository accessRepository;
 
+    CompanyRepository companyRepository;
+
     PasswordEncoder encoder;
 
     RefreshTokenService refreshTokenService;
 
     JwtUtils jwtUtils;
+
+    EmailService emailService;
 
     @Override
     public LoginResponse authenticateUser(LoginRequest loginRequest) {
@@ -101,6 +107,18 @@ public class UserServiceImpl implements IUserService {
             ArrayList<String> _roles = new ArrayList<>();
             _roles.add("ROLE_ADMIN");
 
+            boolean hasCompany = companyRepository.hasCompany(user.getId());
+            boolean hasAboutUs = companyRepository.hasAboutUs(user.getId());
+
+            // Send welcome email after successful registration
+            try {
+                emailService.sendWelcomeEmail("khalilouertani92@gmail.com", user.getFirstName(), user.getLastName());
+                log.info("Welcome email sent to user: {}", user.getEmail());
+            } catch (Exception e) {
+                log.error("Failed to send welcome email to user: {}", user.getEmail(), e);
+                // Don't fail the registration if email sending fails
+            }
+
             return new LoginResponse(
                     "success",
                     jwt,
@@ -113,7 +131,9 @@ public class UserServiceImpl implements IUserService {
                             refreshToken.getToken(),
                             user.getRoles().stream().map((role) -> role.getName().name()).collect(Collectors.toList()),
                             user.getAccesses().stream().map((access) -> access.getType().name())
-                                    .collect(Collectors.toList())));
+                                    .collect(Collectors.toList()),
+                            hasCompany,
+                            hasAboutUs));
         } catch (Exception e) {
             return new LoginResponse(
                     "failed",
@@ -200,7 +220,18 @@ public class UserServiceImpl implements IUserService {
         });
 
         user.setRoles(roles);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        // Send welcome email to new user
+        try {
+            emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getFirstName(), savedUser.getLastName());
+            log.info("Welcome email sent to new user: {}", savedUser.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send welcome email to new user: {}", savedUser.getEmail(), e);
+            // Don't fail the registration if email sending fails
+        }
+
+        return savedUser;
 
     }
 

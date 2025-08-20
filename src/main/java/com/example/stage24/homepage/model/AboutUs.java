@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.example.stage24.company.model.Company;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -15,6 +16,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"company", "companyValues", "teamMembers", "companyStatistics"})
 public class AboutUs {
     
     @Id

@@ -14,6 +14,30 @@ spring:
       max-file-size: 256MB
       max-request-size: 256MB
       enabled: true
+  mail:
+    host: 127.0.0.1
+    port: 1025
+    username: nizarouertani9@protonmail.com
+    password: RbdiLSV64u0
+    # password: RbdiLSV64u0_90CEV7dlpg
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: false
+          ssl:
+            enable: false
+            trust: "*"
+            checkserveridentity: false
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
+
+# Email configuration
+email:
+  from: nizarouertani9@protonmail.com
 
 application:
   security:
@@ -31,8 +55,6 @@ upload:
 # Stripe Configuration
 stripe:
   secret:
-    key: sk_test_51RXlPKQ6JcV4ZCjFQbwDeEqDlhyMyukOGkpDcr8ZXONpc3V8DTUVCNWRgQnRoRM9KAuKXOweGnizEnwsqssuwFoV00gqiwdv9c # Replace with your actual Stripe secret key
+    key: sk_test_51RXlPKQ6JcV4ZCjFQbwDeEqDlhyMyukOGkpDcr8ZXONpc3V8DTUVCNWRgQnRoRM9KAuKXOweGnizEnwsqssuwFoV00gqiwdv9c 
   publishable:
-    key: pk_test_51RXlPKQ6JcV4ZCjF1vl3NeGmma3hKAnfSGEKpULi1MYwVyduiUhViG3Dkdvdhl9IOhe6AkzlKgbyNUJGXumc2XLs00qULacej6 # Replace with your actual Stripe publishable key
-  # webhook:
-  #   secret: whsec_1234567890abcdef # Replace with your actual webhook secret
+    key: pk_test_51RXlPKQ6JcV4ZCjF1vl3NeGmma3hKAnfSGEKpULi1MYwVyduiUhViG3Dkdvdhl9IOhe6AkzlKgbyNUJGXumc2XLs00qULacej6 

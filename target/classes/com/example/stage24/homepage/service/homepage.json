@@ -1,0 +1,226 @@
+{
+  "hero": {
+    "badge": "New Collection",
+    "title": "Timeless Design<br>Modern Living",
+    "subtitle": "Discover our curated collection of premium furniture and home accessories, crafted for the discerning eye and built to last generations.",
+    "primaryCta": "Explore Collection",
+    "secondaryCta": "Plan Your Room in 3D",
+    "buttonText": "Shop Collection",
+    "primaryButton": "Explore Collection",
+    "secondaryButton": "Plan Your Room in 3D",
+    "backgroundImage": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+    "image": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
+  },
+  "featured": {
+    "title": "Featured Collection",
+    "subtitle": "Handpicked pieces that define contemporary elegance",
+    "products": [
+      {
+        "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        "category": "Living Room",
+        "name": "Milano Sectional Sofa",
+        "description": "A masterpiece of Italian design, featuring premium Italian leather upholstery and solid oak frame. The Milano combines unparalleled comfort with sophisticated aesthetics.",
+        "price": "$3,299"
+      },
+      {
+        "image": "https://images.unsplash.com/photo-1581539250439-c96689b516dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        "category": "Dining Room",
+        "name": "Scandinavian Dining Set",
+        "description": "Clean lines meet warm wood tones in this exceptional dining collection. Crafted from sustainable Nordic oak with precision joinery and minimalist design philosophy.",
+        "price": "$2,499"
+      },
+      {
+        "image": "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        "category": "Bedroom",
+        "name": "Contemporary Platform Bed",
+        "description": "Sleek and sophisticated, this platform bed features a floating nightstand design and integrated LED lighting. Perfect for the modern bedroom sanctuary.",
+        "price": "$1,899"
+      }
+    ]
+  },
+  "categories": {
+    "title": "Shop by Category",
+    "subtitle": "Find the perfect pieces for every room in your home",
+    "items": [
+      {
+        "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        "name": "Living Room",
+        "count": "245 Products"
+      },
+      {
+        "image": "https://images.unsplash.com/photo-1631679706909-1844bbd07221?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        "name": "Bedroom",
+        "count": "180 Products"
+      },
+      {
+        "image": "https://images.unsplash.com/photo-1581539250439-c96689b516dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        "name": "Dining Room",
+        "count": "120 Products"
+      }
+    ]
+  },
+  "experience": {
+    "title": "Crafting Excellence",
+    "subtitle": "Discover what makes our furniture extraordinary",
+    "cards": [
+      {
+        "title": "Exceptional Craftsmanship",
+        "description": "Every piece is handcrafted by master artisans using time-honored techniques and the finest materials sourced globally. Our commitment to excellence ensures furniture that lasts generations.",
+        "link": "Discover Process →",
+        "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        "title": "Bespoke Design",
+        "description": "Collaborate with our design team to create furniture that perfectly reflects your vision and lifestyle.",
+        "link": "Start Designing →",
+        "image": "https://images.unsplash.com/photo-1581539250439-c96689b516dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        "title": "Sustainable Materials",
+        "description": "Committed to environmental responsibility through sustainable sourcing and eco-friendly practices.",
+        "link": "Learn More →",
+        "image": "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        "title": "Lifetime Warranty",
+        "description": "We stand behind our craftsmanship with comprehensive warranty coverage and dedicated support.",
+        "link": "View Coverage →",
+        "image": "https://images.unsplash.com/photo-1631679706909-1844bbd07221?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+      }
+    ]
+  },
+  "gallery": {
+    "title": "Signature Collection",
+    "subtitle": "Discover pieces that redefine luxury living",
+    "products": [
+      {
+        "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        "name": "Venetian Sectional",
+        "price": "$4,299",
+        "button": "Quick View"
+      },
+      {
+        "image": "https://images.unsplash.com/photo-1581539250439-c96689b516dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        "name": "Heritage Dining Set",
+        "price": "$3,199",
+        "button": "Quick View"
+      },
+      {
+        "image": "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        "name": "Metropolitan Suite",
+        "price": "$2,899",
+        "button": "Quick View"
+      },
+      {
+        "image": "https://images.unsplash.com/photo-1631679706909-1844bbd07221?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        "name": "Sanctuary Collection",
+        "price": "From $1,899",
+        "button": "Quick View"
+      }
+    ],
+    "artisan": {
+      "title": "Artisan Spotlight",
+      "description": "Meet our master craftspeople who bring decades of expertise to every piece. Each item tells a story of dedication, skill, and passion for exceptional design.",
+      "link": "Meet the Team →",
+      "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+    },
+    "dining": {
+      "title": "Dining Experience",
+      "description": "Transform every meal into a memorable occasion",
+      "button": "Explore Collection",
+      "image": "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+    }
+  },
+  "features": {
+    "title": "Why Choose Nova",
+    "subtitle": "We combine innovative design with exceptional craftsmanship to create furniture that stands the test of time",
+    "items": [
+      {
+        "title": "Innovative Design",
+        "description": "Our award-winning design team creates unique pieces that seamlessly blend contemporary aesthetics with functional excellence, ensuring each item transforms your space.",
+        "link": "Explore Designs"
+      },
+      {
+        "title": "Premium Quality",
+        "description": "Crafted with the finest materials and time-tested construction techniques, our furniture is built to last generations while maintaining its beauty and functionality.",
+        "link": "Quality Promise"
+      },
+      {
+        "title": "Sustainable Future",
+        "description": "We're committed to environmental responsibility through sustainable sourcing, eco-friendly manufacturing, and carbon-neutral shipping for a better tomorrow.",
+        "link": "Our Mission"
+      }
+    ]
+  },
+  "products": {
+    "title": "Featured Products",
+    "items": [
+      {
+        "image": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        "badge": "Best Seller",
+        "category": "Living Room",
+        "name": "Luxe Sectional Sofa",
+        "price": "$2,499",
+        "buttonText": "Add to Cart"
+      },
+      {
+        "image": "https://images.unsplash.com/photo-1631679706909-1844bbd07221?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        "badge": "New",
+        "category": "Bedroom",
+        "name": "Minimalist Platform Bed",
+        "price": "$1,899",
+        "buttonText": "Add to Cart"
+      },
+      {
+        "image": "https://images.unsplash.com/photo-1581539250439-c96689b516dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        "badge": "Limited",
+        "category": "Dining",
+        "name": "Oak Dining Table",
+        "price": "$1,599",
+        "buttonText": "Add to Cart"
+      },
+      {
+        "image": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        "badge": "Popular",
+        "category": "Living Room",
+        "name": "Glass Coffee Table",
+        "price": "$899",
+        "buttonText": "Add to Cart"
+      }
+    ]
+  },
+  "stats": {
+    "items": [
+      {
+        "number": "25+",
+        "label": "Years Experience"
+      },
+      {
+        "number": "10k+",
+        "label": "Happy Clients"
+      },
+      {
+        "number": "50+",
+        "label": "Master Artisans"
+      }
+    ]
+  },
+  "whyChoose": {
+    "title": "Why Choose Us",
+    "features": [
+      "Free Design Consultation",
+      "White Glove Delivery",
+      "Lifetime Support"
+    ]
+  },
+  "artisan": {
+    "title": "Artisan Spotlight",
+    "description": "Meet our master craftspeople who bring decades of expertise to every piece. Each item tells a story of passion, precision, and uncompromising quality.",
+    "link": "Meet the Team →",
+    "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+  },
+  "newsletter": {
+    "title": "Stay Inspired",
+    "text": "Subscribe to our newsletter for exclusive previews, design tips, and special offers on our latest collections."
+  }
+}

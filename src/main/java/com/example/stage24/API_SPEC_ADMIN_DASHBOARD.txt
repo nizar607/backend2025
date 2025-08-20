@@ -1,0 +1,163 @@
+Admin Dashboard - Backend API Specification
+
+Overview:
+This document lists backend API endpoints to support the Admin Dashboard and related entities observed in the frontend store (Article, Agent, Category, Company, Customer, Review, Invoices, Calendar/Meetings, Favorites, Cart, Homepage content, etc.). These APIs cover both metrics for the dashboard and CRUD operations for core entities. Adjust base path and auth according to your backend stack.
+
+General Notes:
+- Base URL: /api
+- Authentication: JWT Bearer tokens (Authorization: Bearer <token>)
+- Content-Type: application/json unless otherwise noted
+- Pagination: use query params ?page=1&size=20
+- Sorting/Filtering: use query params e.g. ?sort=createdAt,desc&status=ACTIVE
+
+1) Dashboard Metrics & Activity
+GET /api/admin/dashboard/metrics
+- Returns aggregated metrics for counts and trends (articles, agents, categories, customers, companies, reviews, invoices, etc.)
+Response:
+{
+  "articles": { "total": 156, "published": 142, "draft": 14, "trendPct": 12.5 },
+  "agents": { "active": 32, "inactive": 8, "trendPct": 8.2 },
+  "categories": { "total": 18, "trendPct": 2.1 },
+  "reviews": { "pending": 24, "approved": 210, "rejected": 5, "trendPct": -5.3 },
+  "customers": { "total": 2847, "newThisMonth": 120, "trendPct": 15.7 },
+  "companies": { "active": 89, "trendPct": 3.4 },
+  "invoices": { "total": 502, "paid": 430, "due": 72, "revenueThisMonth": 153200 }
+}
+
+GET /api/admin/dashboard/recent-activity?limit=10
+- Returns latest cross-entity activities (creation, updates, reviews, etc.)
+Response:
+[
+  { "id": 1, "type": "article", "description": "Article 'Trends 2024' published", "timestamp": "2025-08-19T10:00:00Z", "user": "John Smith" },
+  { "id": 2, "type": "agent", "description": "Agent Sarah Wilson updated profile", "timestamp": "2025-08-19T08:00:00Z", "user": "Admin" }
+]
+
+2) Articles
+GET /api/articles?page=1&size=20&status=PUBLISHED|DRAFT&categoryId=...
+GET /api/articles/{id}
+POST /api/articles
+PUT /api/articles/{id}
+DELETE /api/articles/{id}
+
+3) Agents
+GET /api/agents?page=1&size=20&status=ACTIVE|INACTIVE
+GET /api/agents/{id}
+POST /api/agents
+PUT /api/agents/{id}
+DELETE /api/agents/{id}
+
+4) Categories
+GET /api/categories
+GET /api/categories/{id}
+POST /api/categories
+PUT /api/categories/{id}
+DELETE /api/categories/{id}
+
+5) Companies
+GET /api/companies?page=1&size=20&status=ACTIVE|INACTIVE
+GET /api/companies/{id}
+POST /api/companies
+PUT /api/companies/{id}
+DELETE /api/companies/{id}
+
+6) Customers
+GET /api/customers?page=1&size=20
+GET /api/customers/{id}
+POST /api/customers
+PUT /api/customers/{id}
+DELETE /api/customers/{id}
+
+7) Reviews
+GET /api/reviews?page=1&size=20&status=PENDING|APPROVED|REJECTED
+GET /api/reviews/{id}
+POST /api/reviews
+PUT /api/reviews/{id}
+DELETE /api/reviews/{id}
+PATCH /api/reviews/{id}/approve
+PATCH /api/reviews/{id}/reject
+
+8) Invoices / Billing
+GET /api/invoices?page=1&size=20&status=PAID|DUE|OVERDUE
+GET /api/invoices/{id}
+POST /api/invoices
+PUT /api/invoices/{id}
+DELETE /api/invoices/{id}
+GET /api/invoices/stats?from=YYYY-MM-DD&to=YYYY-MM-DD
+
+9) Calendar / Meetings
+GET /api/meetings?page=1&size=20&date=YYYY-MM-DD
+GET /api/meetings/{id}
+POST /api/meetings
+PUT /api/meetings/{id}
+DELETE /api/meetings/{id}
+
+10) Favorites
+GET /api/favorites?page=1&size=20&userId=...
+POST /api/favorites
+DELETE /api/favorites/{id}
+
+11) Cart
+GET /api/cart?userId=...
+POST /api/cart/items
+PUT /api/cart/items/{id}
+DELETE /api/cart/items/{id}
+POST /api/cart/checkout
+
+12) Homepage Content (CMS-like)
+GET /api/homepage
+PUT /api/homepage                      // update sections content
+
+13) Authentication & Users (for admin management)
+GET /api/users?page=1&size=20&role=ROLE_ADMIN|ROLE_AGENT|ROLE_CUSTOMER
+GET /api/users/{id}
+POST /api/users
+PUT /api/users/{id}
+DELETE /api/users/{id}
+PATCH /api/users/{id}/status           // enable/disable
+PATCH /api/users/{id}/roles            // update roles
+
+14) Uploads (images, attachments)
+POST /api/uploads   // multipart/form-data
+DELETE /api/uploads/{id}
+
+15) Settings (global app config)
+GET /api/settings
+PUT /api/settings
+
+16) Audit Logs (optional but recommended)
+GET /api/audit-logs?page=1&size=50&entity=article|agent|...
+
+17) Health & Version
+GET /api/health
+GET /api/version
+
+Notes on Implementation:
+- Use consistent DTOs aligned with existing NgRx models in frontend store folders.
+- Secure admin endpoints under /api/admin/* with role-based access (ROLE_ADMIN).
+- For metrics endpoints, aggregate from respective tables/collections and cache for short TTL (e.g., 60s) to improve performance.
+- Include createdAt/updatedAt timestamps in all entities to facilitate recent-activity feeds.
+- Where applicable, support soft deletes with status flags.
+
+====================================
+ADMIN DASHBOARD - VISUALIZATION OVERVIEW (UI DESCRIPTION)
+====================================
+
+This section documents the two additional "fancy" charts added to the Admin Dashboard UI. These charts are fed by static demo datasets today and are intended to be connected to the backend endpoints described earlier when APIs are available.
+
+1) Sales Trend (Line Chart)
+- Purpose: Show a monthly trend of Revenue and Orders to give admins a quick sense of growth and seasonality.
+- Type: Smooth line chart with two series (Revenue, Orders).
+- Timeframe: January through December.
+- Visuals: Clean grid, smoothed lines, subtle markers on hover, automatic color binding from theme variables.
+- Notes for integration: Replace the static series with data fetched from the analytics/insights endpoints (e.g., /api/analytics/revenue and /api/orders/summary). Ensure timezone-awareness and currency localization.
+
+2) Traffic Breakdown (Donut Chart)
+- Purpose: Provide a quick breakdown of traffic sources to the platform for channel mix awareness.
+- Type: Donut pie chart with four segments (Organic, Direct, Referral, Ads).
+- Visuals: 70% donut size, legend at the bottom, colors driven by theme variables for dark/light mode support.
+- Notes for integration: Replace static percentages with an endpoint such as /api/traffic/sources. Consider a date range filter and a compare-to-previous-period toggle for richer analysis.
+
+Design & Theming Notes
+- Colors are resolved from CSS variables so charts adapt to the active theme automatically.
+- When wiring to real APIs, handle loading states and empty datasets gracefully (show skeletons or empty states).
+- Keep the charts minimalistic to blend with the rest of the dashboard's clean visual style.

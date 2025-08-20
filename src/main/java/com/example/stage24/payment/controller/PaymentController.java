@@ -24,9 +24,9 @@ import java.util.Map;
 @RequestMapping("/api/payments")
 public class PaymentController {
 
-    private StripePaymentService stripePaymentService;
+    private final StripePaymentService stripePaymentService;
 
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
     /**
      * Create Stripe payment intent
