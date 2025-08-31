@@ -15,9 +15,9 @@ import java.util.Optional;
 @RequestMapping("/api/homepage1")
 @AllArgsConstructor
 public class Homepage1Controller {
-    
+
     private final Homepage1Service homepage1Service;
-    
+
     @GetMapping
     public ResponseEntity<Homepage1DTO> getHomepage1ByConnectedUser() {
         try {
@@ -27,20 +27,20 @@ public class Homepage1Controller {
             return ResponseEntity.ok().build();
         }
     }
-    
+
     @GetMapping("all")
     public ResponseEntity<List<Homepage1DTO>> getAllHomepage1s() {
         List<Homepage1DTO> homepage1s = homepage1Service.getAllHomepage1s();
         return ResponseEntity.ok(homepage1s);
     }
-    
+
     @GetMapping("/company/{companyId}")
     public ResponseEntity<Homepage1DTO> getHomepage1ByCompanyId(@PathVariable Long companyId) {
         Optional<Homepage1DTO> homepage1 = homepage1Service.getHomepage1ByCompanyId(companyId);
         return homepage1.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
     @PostMapping
     public ResponseEntity<Homepage1DTO> createHomepage1(@RequestBody Homepage1DTO homepage1DTO) {
         try {
@@ -50,13 +50,13 @@ public class Homepage1Controller {
             return ResponseEntity.badRequest().build();
         }
     }
-    
+
     @GetMapping("/exists/company/{companyId}")
     public ResponseEntity<Boolean> checkHomepage1Exists(@PathVariable Long companyId) {
         boolean exists = homepage1Service.existsByCompanyId(companyId);
         return ResponseEntity.ok(exists);
     }
-    
+
     @DeleteMapping("/company/{companyId}")
     public ResponseEntity<Void> deleteHomepage1ByCompanyId(@PathVariable Long companyId) {
         try {
@@ -66,7 +66,7 @@ public class Homepage1Controller {
             return ResponseEntity.notFound().build();
         }
     }
-    
+
     /**
      * Update homepage1 content (text-only fields)
      * This endpoint handles all text content updates without affecting images
@@ -84,7 +84,7 @@ public class Homepage1Controller {
             return ResponseEntity.badRequest().build();
         }
     }
-    
+
     /**
      * Update homepage1 images
      * This endpoint handles all image uploads for the homepage1
@@ -102,7 +102,7 @@ public class Homepage1Controller {
             @RequestParam(value = "categoryItem1Image", required = false) MultipartFile categoryItem1Image,
             @RequestParam(value = "categoryItem2Image", required = false) MultipartFile categoryItem2Image,
             @RequestParam(value = "categoryItem3Image", required = false) MultipartFile categoryItem3Image) {
-        
+
         try {
             Homepage1DTO updatedHomepage1 = homepage1Service.updateHomepage1Images(
                     id,
@@ -115,9 +115,8 @@ public class Homepage1Controller {
                     featuredProduct3Image,
                     categoryItem1Image,
                     categoryItem2Image,
-                    categoryItem3Image
-            );
-            
+                    categoryItem3Image);
+
             return ResponseEntity.ok(updatedHomepage1);
         } catch (RuntimeException e) {
             return ResponseEntity.ok().build();
@@ -125,4 +124,12 @@ public class Homepage1Controller {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/by-website/{website}")
+    public ResponseEntity<Homepage1DTO> getHomepage1ByWebsite(@PathVariable String website) {
+        Optional<Homepage1DTO> homepage1 = homepage1Service.getHomepage1ByWebsite(website);
+        return homepage1.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }

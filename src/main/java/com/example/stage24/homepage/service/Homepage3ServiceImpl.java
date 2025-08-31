@@ -58,6 +58,16 @@ public class Homepage3ServiceImpl implements Homepage3Service {
                 .orElseThrow(() -> new RuntimeException("Homepage3 not found for company ID: " + companyId));
         return convertToDTO(homepage3);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Homepage3DTO getHomepage3ByWebsite(String website) {
+        Company company = companyRepository.findByWebsite(website)
+                .orElseThrow(() -> new RuntimeException("Company not found for website: " + website));
+        Homepage3 homepage3 = homepage3Repository.findByCompanyId(company.getId())
+                .orElseThrow(() -> new RuntimeException("Homepage3 not found for website: " + website));
+        return convertToDTO(homepage3);
+    }
     
     @Override
     public Homepage3DTO saveHomepage3(Homepage3DTO homepage3DTO) {

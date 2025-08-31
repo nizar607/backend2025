@@ -59,6 +59,16 @@ public class Homepage2ServiceImpl implements Homepage2Service {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Homepage2DTO getHomepage2ByWebsite(String website) {
+        Company company = companyRepository.findByWebsite(website)
+                .orElseThrow(() -> new RuntimeException("Company not found for website: " + website));
+        Homepage2 homepage2 = homepage2Repository.findByCompanyId(company.getId())
+                .orElseThrow(() -> new RuntimeException("Homepage2 not found for website: " + website));
+        return convertToDTO(homepage2);
+    }
+
+    @Override
     public Homepage2DTO saveHomepage2(Homepage2DTO homepage2DTO) {
         Homepage2 homepage2 = convertToEntity(homepage2DTO);
         homepage2.setCreatedAt(LocalDateTime.now());

@@ -7,24 +7,17 @@ import com.example.stage24.user.domain.User;
 import com.example.stage24.user.model.request.NewAgentRequest;
 import com.example.stage24.user.model.response.AgentResponse;
 import com.example.stage24.user.service.interfaces.AgentServiceInterface;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Value;
 
 //@CrossOrigin(origins = "*", maxAge = 3600)
 @Validated

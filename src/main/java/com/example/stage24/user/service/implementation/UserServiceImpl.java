@@ -11,17 +11,19 @@ import com.example.stage24.user.domain.RoleType;
 import com.example.stage24.user.domain.User;
 import com.example.stage24.user.domain.User;
 import com.example.stage24.user.domain.Access;
-import com.example.stage24.user.domain.AccessType;
+import com.example.stage24.user.domain.*;
 import com.example.stage24.user.model.request.LoginRequest;
 import com.example.stage24.user.model.request.SignupRequest;
 import com.example.stage24.user.model.request.TokenRefreshRequest;
+import com.example.stage24.user.model.response.DataResponse;
 import com.example.stage24.user.model.response.LoginResponse;
 import com.example.stage24.user.model.response.TokenRefreshResponse;
+import com.example.stage24.user.model.response.UserStatsResponse;
 import com.example.stage24.user.repository.AccessRepository;
-import com.example.stage24.user.model.response.DataResponse;
 import com.example.stage24.user.repository.RoleRepository;
 import com.example.stage24.user.repository.UserRepository;
 import com.example.stage24.user.service.interfaces.IUserService;
+import com.example.stage24.company.model.Company;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,6 +34,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -133,7 +136,8 @@ public class UserServiceImpl implements IUserService {
                             user.getAccesses().stream().map((access) -> access.getType().name())
                                     .collect(Collectors.toList()),
                             hasCompany,
-                            hasAboutUs));
+                            hasAboutUs,
+                            user.isEnabled()));
         } catch (Exception e) {
             return new LoginResponse(
                     "failed",
@@ -236,6 +240,57 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public User registerClient(SignupRequest signUpRequest, String website) throws RuntimeException {
+
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return null;
+        }
+
+        // Create new user's account
+        User user = new User(signUpRequest.getEmail(),
+                signUpRequest.getFirstName(),
+                signUpRequest.getLastName(),
+                encoder.encode(signUpRequest.getPassword()));
+
+        Set<String> strRoles = signUpRequest.getRoles();
+        List<Role> roles = new LinkedList();
+
+        strRoles.forEach(role -> {
+            switch (role) {
+
+                case "ROLE_CLIENT":
+                    Role clientRole = roleRepository.findByName(RoleType.ROLE_CLIENT)
+                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    roles.add(clientRole);
+
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Unsupported role: " + role);
+
+            }
+        });
+
+        user.setRoles(roles);
+        companyRepository.findByWebsite(website).ifPresent(company -> {
+            user.setCompany(company);
+        });
+        User savedUser = userRepository.save(user);
+
+        // Send welcome email to new user
+        try {
+            emailService.sendWelcomeEmail(savedUser.getEmail(), savedUser.getFirstName(), savedUser.getLastName());
+            log.info("Welcome email sent to new user: {}", savedUser.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send welcome email to new user: {}", savedUser.getEmail(), e);
+            // Don't fail the registration if email sending fails
+        }
+
+        return savedUser;
+
+    }
+
+    @Override
     public Role addRole(Role role) {
         return roleRepository.save(role);
     }
@@ -255,5 +310,57 @@ public class UserServiceImpl implements IUserService {
     @Override
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
+    }
+
+    @Override
+    public List<User> getClientUsersByCompany() {
+        // Get the connected user
+        User connectedUser = getConnectedUser()
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Find the company of the connected user
+        Company company = companyRepository.findByUsersContaining(connectedUser)
+                .orElseThrow(() -> new RuntimeException("Company not found for connected user"));
+
+        // Return all client users for this company
+        return userRepository.findByCompanyAndRoleType(company.getId(), RoleType.ROLE_CLIENT);
+    }
+
+    @Override
+    public User updateClientEnabledStatus(Long clientId, boolean enabled) {
+        User client = userRepository.findById(clientId)
+                .orElseThrow(() -> new RuntimeException("Client not found with id: " + clientId));
+        client.setUpdatedAt(LocalDateTime.now());
+        client.setEnabled(enabled);
+        return userRepository.save(client);
+    }
+
+    @Override
+    public UserStatsResponse getUserStats() {
+        // Get the connected user
+        User connectedUser = getConnectedUser()
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Get the user's company
+        Company company = companyRepository.findByUsersContaining(connectedUser)
+                .orElseThrow(() -> new RuntimeException("Company not found for connected user"));
+
+        // Get all client users for this company
+        List<User> companyClientUsers = userRepository.findByCompanyAndRoleType(company.getId(), RoleType.ROLE_CLIENT);
+
+        // Count total client users
+        long total = companyClientUsers.size();
+
+        // Count banned client users (enabled = false)
+        long banned = companyClientUsers.stream()
+                .filter(user -> !user.isEnabled())
+                .count();
+
+        // Count permitted client users (enabled = true)
+        long permitted = companyClientUsers.stream()
+                .filter(User::isEnabled)
+                .count();
+
+        return new UserStatsResponse(total, banned, permitted);
     }
 }

@@ -25,6 +25,11 @@ public interface Homepage2Service {
     Homepage2DTO getHomepage2ByCompanyId(Long companyId);
     
     /**
+     * Get homepage2 by website
+     */
+    Homepage2DTO getHomepage2ByWebsite(String website);
+    
+    /**
      * Save or update homepage2
      */
     Homepage2DTO saveHomepage2(Homepage2DTO homepage2DTO);

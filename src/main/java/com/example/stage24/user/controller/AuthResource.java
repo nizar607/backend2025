@@ -49,6 +49,19 @@ public class AuthResource {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
+    @PostMapping("/add-user/{website}")
+    public ResponseEntity<?> addUser(@Valid @RequestBody SignupRequest signUpRequest, @PathVariable String website) {
+        User user = userService.registerClient(signUpRequest, website);
+
+        if (user == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Email is already in use!"));
+        }
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
     @PostMapping("/add-agent")
     @PreAuthorize("hasRole('ROLE_LAWYER') or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> registerAgent(@Valid @RequestBody SignupRequest signUpRequest) {
@@ -73,7 +86,6 @@ public class AuthResource {
     public List<User> getUsers() {
         return userService.getUsers();
     }
-
 
     @GetMapping("/accesses")
     public ResponseEntity<?> getAccesses() {

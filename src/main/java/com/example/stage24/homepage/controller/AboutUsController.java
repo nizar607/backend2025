@@ -73,6 +73,27 @@ public class AboutUsController {
     }
 
     /**
+     * Get about us content by website
+     */
+    @GetMapping("/by-website/{website}")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<?> getAboutUsByWebsite(@PathVariable String website) {
+        try {
+            Optional<AboutUsDTO> aboutUs = aboutUsService.getAboutUsByWebsite(website);
+
+            if (aboutUs.isPresent()) {
+                return ResponseEntity.ok(aboutUs.get());
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("About Us content not found for website: " + website);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving About Us content: " + e.getMessage());
+        }
+    }
+
+    /**
      * Update about us text content only (without images)
      */
     @PutMapping("/{id}")

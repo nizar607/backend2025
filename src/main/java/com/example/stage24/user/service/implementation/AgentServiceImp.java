@@ -1,8 +1,7 @@
 package com.example.stage24.user.service.implementation;
 
-
-
-
+import com.example.stage24.company.model.Company;
+import com.example.stage24.company.repository.CompanyRepository;
 import com.example.stage24.user.domain.*;
 import com.example.stage24.user.model.request.NewAgentRequest;
 import com.example.stage24.user.repository.AccessRepository;
@@ -27,6 +26,7 @@ public class AgentServiceImp implements AgentServiceInterface {
     private final AccessRepository accessRepository;
     private final PasswordEncoder encoder;
     private final IUserService userService;
+    private final CompanyRepository companyRepository;
 
     @Override
     public User registerAgent(NewAgentRequest newAgentRequest) {
@@ -68,6 +68,13 @@ public class AgentServiceImp implements AgentServiceInterface {
         Optional<User> connectedUser = userService.getConnectedUser();
         connectedUser.ifPresent(user::setCreatedBy);
 
+        // Get the current user's company and assign it to the agent
+        if (connectedUser.isPresent()) {
+            Company company = companyRepository.findByUsersContaining(connectedUser.get())
+                    .orElseThrow(() -> new RuntimeException("Company not found for connected user"));
+            user.setCompany(company);
+        }
+
         return userRepository.save(user);
 
     }
@@ -80,10 +87,14 @@ public class AgentServiceImp implements AgentServiceInterface {
 
     @Override
     public List<User> getAgents() {
-        Role role = roleRepository.findByName(RoleType.ROLE_AGENT)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        // Restrict agents to the connected user's company
+        User connectedUser = userService.getConnectedUser()
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return userRepository.findAllByRolesContaining(role);
+        Company company = companyRepository.findByUsersContaining(connectedUser)
+                .orElseThrow(() -> new RuntimeException("Company not found for connected user"));
+
+        return userRepository.findByCompanyAndRoleType(company.getId(), RoleType.ROLE_AGENT);
     }
 
     @Override

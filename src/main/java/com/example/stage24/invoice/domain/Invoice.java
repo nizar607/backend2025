@@ -1,8 +1,5 @@
 package com.example.stage24.invoice.domain;
 
-import com.example.stage24.order.domain.Order;
-import com.example.stage24.user.domain.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,145 +9,91 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-@Data
+
 @Entity
+@Data
 @Table(name = "invoices")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Invoice {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
-    @JsonIgnore
-    private Order order;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    @JsonIgnore
-    private User user;
-
     @NotBlank
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String invoiceNumber;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    private InvoiceStatus status;
+    private InvoiceStatus status = InvoiceStatus.PENDING;
+
+    private String userEmail;
+    private String userFirstName;
+    private String userLastName;
+    private String userPhone;
+    private String userAddress;
 
     // Company Information
     private String companyName;
-    
     private String companyAddress;
-
     private String companyEmail;
-
-    private String companyPhoneNumber;
-
-    private String companyTaxId;
-
+    private String companyPhone;
     private String companyWebsite;
 
-    // Customer Information (copied from order for historical accuracy)
-    private String customerName;
 
-    private String customerEmail;
-
-    private String customerAddress;
-
-    private String customerCity;
-
-    private String customerState;
-
-    private String customerZipCode;
-
-    private String customerCountry;
-
-    private String customerTaxId;
 
     // Financial Details
     @NotNull
-    private Double subtotalAmount;
+  
+    private Double subtotalAmount = 0.0;
 
     @NotNull
-    private Double taxAmount;
 
-    private Double discountAmount = 0.0;
-
-    private Double shippingAmount = 0.0;
+    private Double taxAmount = 0.0;
 
     @NotNull
-    private Double totalAmount;
 
+    private Double totalAmount = 0.0;
+
+    @Column(length = 3)
     private String currency = "USD";
 
-    // Payment Terms
-    private Integer paymentTermsDays = 30; // Net 30 days
+    // Tax rate as percentage (e.g., 8.5 for 8.5%)
+    private Double taxRate = 0.0;
 
     @NotNull
-    private LocalDate issueDate;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @NotNull
-    private LocalDate dueDate;
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-    private LocalDate paidDate;
-
-    // Invoice Items
+    // Invoice Items (Articles)
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<InvoiceItem> invoiceItems;
+    private List<InvoiceItem> invoiceItems = new ArrayList<>();
 
-    // Notes and Terms
-    private String notes;
-
-    private String terms;
-
+    @Column(columnDefinition = "TEXT")
     private String footerText;
-
-    // Timestamps
-    @NotNull
-    private LocalDateTime createdAt;
-
-    @NotNull
-    private LocalDateTime updatedAt;
-
-    private LocalDateTime sentAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        
-        if (status == null) {
-            status = InvoiceStatus.DRAFT;
-        }
-        
-        if (issueDate == null) {
-            issueDate = LocalDate.now();
-        }
-        
-        if (dueDate == null && paymentTermsDays != null) {
-            dueDate = issueDate.plusDays(paymentTermsDays);
+
+        if (invoiceNumber == null || invoiceNumber.isEmpty()) {
+            generateInvoiceNumber();
         }
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-        
-        if (status == InvoiceStatus.PAID && paidDate == null) {
-            paidDate = LocalDate.now();
-        }
-        
-        if (status == InvoiceStatus.SENT && sentAt == null) {
-            sentAt = LocalDateTime.now();
-        }
+
+        this.updatedAt = LocalDateTime.now();
     }
 
     // Helper method to generate invoice number
@@ -163,27 +106,39 @@ public class Invoice {
         }
     }
 
-    // Helper method to copy customer details from order
-    public void setCustomerDetailsFromOrder(Order order) {
-        if (order != null && order.getUser() != null) {
-            User customer = order.getUser();
-            this.customerName = customer.getFirstName() + " " + customer.getLastName();
-            this.customerEmail = customer.getEmail();
-            this.customerAddress = order.getBillingAddress();
-            this.customerCity = order.getBillingCity();
-            this.customerState = order.getBillingState();
-            this.customerZipCode = order.getBillingZipCode();
-            this.customerCountry = order.getBillingCountry();
+    // Helper method to add invoice item
+    public void addInvoiceItem(InvoiceItem item) {
+        invoiceItems.add(item);
+        item.setInvoice(this);
+    }
+
+    // Helper method to remove invoice item
+    public void removeInvoiceItem(InvoiceItem item) {
+        invoiceItems.remove(item);
+        item.setInvoice(null);
+    }
+
+    // Helper method to calculate totals
+    public void calculateTotals() {
+        subtotalAmount = 0.;
+         invoiceItems.stream()
+                .map(InvoiceItem::getLineTotal)
+                .mapToDouble(Double::doubleValue).sum();
+
+        // Calculate tax
+        if (taxRate > 0) {
+            taxAmount = subtotalAmount * (taxRate / 100);
+        } else {
+            taxAmount = 0.0;
         }
+
+        // Calculate total
+        totalAmount = subtotalAmount + taxAmount;
     }
 
     public enum InvoiceStatus {
-        DRAFT,
-        SENT,
-        VIEWED,
+        PENDING,
         PAID,
-        OVERDUE,
-        CANCELLED,
-        REFUNDED
+        CANCELLED
     }
 }

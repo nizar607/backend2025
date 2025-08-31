@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 //@EnableWebSecurity
@@ -66,21 +67,33 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
                         .requestMatchers("/api/agent/**").permitAll()
+                        .requestMatchers("/api/article/search/by-website/**").permitAll()
+                        .requestMatchers("/api/clients/**").permitAll()
                         .requestMatchers("/api/payments/**").permitAll()
+                        .requestMatchers("/api/invoices/**").permitAll()
                         .requestMatchers("/api/about-us/**").permitAll()
                         .requestMatchers("/api/homepage1/**").permitAll()
                         .requestMatchers("/api/homepage2/**").permitAll()
                         .requestMatchers("/api/homepage3/**").permitAll()
                         .requestMatchers("/api/homepage/**").permitAll()
+                        .requestMatchers("/api/profile/**").authenticated()
+                        // Allow Stripe success and root pages without authentication
+                        .requestMatchers("/", "/success").permitAll()
                         // Swagger/OpenAPI documentation endpoints
-                        .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
+                        // Require auth for Stripe checkout creating session (uses JWT to identify user)
+                        .requestMatchers("/product/v1/**").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/api/companies/**").permitAll()
                         .requestMatchers("/api/notifications/**").permitAll()
                         .requestMatchers("/api/documents/**").permitAll()
                         .requestMatchers("/api/email/**").permitAll()
                         .requestMatchers("/api/email-test/**").permitAll()
+                        .requestMatchers("/api/article/details/**").permitAll()
+                        .requestMatchers("/api/review/article/**").permitAll()
+                        .requestMatchers("/api/article/by-website/**").permitAll()
+                        .requestMatchers("/api/category/by-website/**").permitAll()
                         .requestMatchers("/api/files/room-plans/**").authenticated()
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()

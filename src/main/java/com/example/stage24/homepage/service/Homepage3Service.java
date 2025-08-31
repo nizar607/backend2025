@@ -15,6 +15,8 @@ public interface Homepage3Service {
     
     Homepage3DTO getHomepage3ByCompanyId(Long companyId);
     
+    Homepage3DTO getHomepage3ByWebsite(String website);
+    
     Homepage3DTO saveHomepage3(Homepage3DTO homepage3DTO);
     
     boolean existsByCompanyId(Long companyId);

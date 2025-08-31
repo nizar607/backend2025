@@ -72,4 +72,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
      */
     @Query("SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM Company c JOIN c.users u JOIN c.aboutUs a WHERE u.id = :userId")
     boolean hasAboutUs(@Param("userId") Long userId);
+
+   
 }

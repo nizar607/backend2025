@@ -1,6 +1,8 @@
 package com.example.stage24.article.domain;
 
 
+
+import com.example.stage24.company.model.Company;
 import com.example.stage24.user.domain.Role;
 import com.example.stage24.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -43,6 +45,9 @@ public class Article {
     @ManyToOne(fetch = FetchType.EAGER)
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     private int quantity;
 

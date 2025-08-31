@@ -48,6 +48,9 @@ public class Company {
     private String phoneNumber;
     
     private String address;
+
+    @Column(name = "version")
+    private String version; // e.g. "v1", "v2", "v3", "custom"
     
     @NotNull
     private boolean active = true;

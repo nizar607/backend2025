@@ -24,6 +24,11 @@ public interface Homepage1Service {
     Optional<Homepage1DTO> getHomepage1ByCompanyId(Long companyId);
     
     /**
+     * Get homepage1 by website
+     */
+    Optional<Homepage1DTO> getHomepage1ByWebsite(String website);
+    
+    /**
      * Save homepage1
      */
     Homepage1DTO saveHomepage1(Homepage1DTO homepage1DTO);

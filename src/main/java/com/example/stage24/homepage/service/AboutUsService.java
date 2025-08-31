@@ -28,6 +28,14 @@ public interface AboutUsService {
     Optional<AboutUsDTO> getAboutUsByCompanyId(Long companyId);
 
     /**
+     * Get about us content by website
+     * 
+     * @param website the website URL
+     * @return Optional containing AboutUsDTO if found
+     */
+    Optional<AboutUsDTO> getAboutUsByWebsite(String website);
+
+    /**
      * Save or update about us content
      * 
      * @param aboutUsDTO the about us data to save

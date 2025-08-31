@@ -12,6 +12,7 @@ import com.example.stage24.homepage.model.*;
 import com.example.stage24.homepage.repository.Homepage1Repository;
 import com.example.stage24.homepage.repository.Homepage2Repository;
 import com.example.stage24.homepage.repository.Homepage3Repository;
+import com.example.stage24.shared.SharedServiceInterface;
 import com.example.stage24.user.domain.User;
 import com.example.stage24.user.domain.Role;
 
@@ -37,6 +38,7 @@ public class CompanyServiceImpl implements CompanyService {
     private final Homepage1Repository homepage1Repository;
     private final Homepage2Repository homepage2Repository;
     private final Homepage3Repository homepage3Repository;
+    private final SharedServiceInterface sharedService;
 
     @Override
     @Transactional(readOnly = true)
@@ -96,6 +98,8 @@ public class CompanyServiceImpl implements CompanyService {
         company.setCreatedAt(LocalDateTime.now());
         company.setUpdatedAt(LocalDateTime.now());
         company.setUsers(List.of(connectedUser));
+        company.setVersion("v1");
+
         connectedUser.setCompany(company);
         Company savedCompany = companyRepository.save(company);
 
@@ -195,6 +199,7 @@ public class CompanyServiceImpl implements CompanyService {
         dto.setActive(company.isActive());
         dto.setCreatedAt(company.getCreatedAt());
         dto.setUpdatedAt(company.getUpdatedAt());
+        dto.setVersion(company.getVersion());
 
         // Add user summaries
         if (company.getUsers() != null) {
@@ -217,6 +222,7 @@ public class CompanyServiceImpl implements CompanyService {
         company.setPhoneNumber(companyDTO.getPhoneNumber());
         company.setAddress(companyDTO.getAddress());
         company.setActive(companyDTO.isActive());
+        company.setVersion(companyDTO.getVersion());
         return company;
     }
 
@@ -832,6 +838,35 @@ public class CompanyServiceImpl implements CompanyService {
                 throw new IllegalArgumentException("Invalid homepage type: " + homepageType + ". Must be v1, v2, or v3.");
         }
     }
+
+
+    @Override
+    public CompanyDTO updateConnectedCompanyVersion(String version) {
+        CompanyDTO company_result = companyRepository.findById(getConnectedCompanyId())
+                .map((company) -> {
+                    company.setVersion(version);
+                    company.setUpdatedAt(LocalDateTime.now());
+                    Company saved = companyRepository.save(company);
+                    return convertToDTO(saved);
+                }).orElseThrow(() -> new RuntimeException("Company not found"));
+        return company_result;
+    }
+
+    // Helper to get connected company id; implementation can vary based on your auth setup
+    private Long getConnectedCompanyId() {
+        User user = sharedService.getConnectedUser()
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return companyRepository.findByUsersContaining(user)
+                .map(Company::getId)
+                .orElseThrow(() -> new RuntimeException("Company not found for connected user"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<String> getVersionByWebsite(String website) {
+        Optional<String> version = companyRepository.findByWebsite(website).map(Company::getVersion);
+        System.out.println("version sout here");
+        System.out.println(version.get());
+        return version;
+    }
 }
-                           
-       

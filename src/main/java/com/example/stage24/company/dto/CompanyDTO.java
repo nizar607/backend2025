@@ -8,6 +8,10 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.stage24.homepage.dto.AboutUsDTO;
+import com.example.stage24.homepage.service.GeneralHomepageService;
+import com.example.stage24.homepage.service.GeneralHomepageService.HomepageResponse;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,6 +37,7 @@ public class CompanyDTO {
     
     private String address;
     
+    private String version; // e.g. "v1", "v2", "v3", "custom"
     
     private boolean active;
     
@@ -43,9 +48,11 @@ public class CompanyDTO {
     // For detailed responses
     private List<UserSummaryDTO> users;
     
-    private HomepageContentSummaryDTO homepageContent;
+    private HomepageResponse homepageContent;
+
+    private String homePageVersion;
     
-    private AboutUsSummaryDTO aboutUs;
+    private AboutUsDTO aboutUs;
     
     // Nested DTOs for summary information
     @Data

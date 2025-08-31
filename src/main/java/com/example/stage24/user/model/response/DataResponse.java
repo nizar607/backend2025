@@ -9,7 +9,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class DataResponse {
 
@@ -23,6 +22,7 @@ public class DataResponse {
     private List<String> accesses;
     private boolean hasCompany;
     private boolean hasAboutUs;
+    private boolean enabled;
 
 
     public DataResponse(String type, String firstName, String lastName, String email, String refreshToken,
@@ -45,6 +45,21 @@ public class DataResponse {
         this.refreshToken = refreshToken;
         this.roles = roles;
         this.accesses = accesses;
+    }
+
+    public DataResponse(String id, String type, String firstName, String lastName, String email, String refreshToken,
+            List<String> roles, List<String> accesses, boolean hasCompany, boolean hasAboutUs, boolean enabled) {
+        this.id = id;
+        this.type = type;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.refreshToken = refreshToken;
+        this.roles = roles;
+        this.accesses = accesses;
+        this.hasCompany = hasCompany;
+        this.hasAboutUs = hasAboutUs;
+        this.enabled = enabled;
     }
 
 }

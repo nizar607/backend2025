@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +34,26 @@ public class ArticleController {
     private final FileStorageService fileStorageService;
     private final CategoryRepository categoryRepository;
     private final ReviewServiceInterface reviewService;
+
+    // Get article by id
+    @PreAuthorize("permitAll()")
+    @GetMapping("/details/{id}")
+    public ResponseEntity<ResponseArticle> getArticleDetailsById(@PathVariable("id") Long id) {
+
+        return articleService.getArticleDetails(id)
+                .map(article -> new ResponseEntity<>(article, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    // Get articles by website
+    @PreAuthorize("permitAll()")
+    @GetMapping("/by-website/{website}")
+    public ResponseEntity<List<ResponseArticle>> getArticlesByWebsite(@PathVariable("website") String website) {
+        log.info("Getting articles for website: {}", website);
+        return articleService.getArticlesByWebsite(website)
+                .map(articles -> new ResponseEntity<>(articles, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
 
     // Create new article
     @PostMapping
@@ -94,11 +115,25 @@ public class ArticleController {
 
     // Get article by id
     @GetMapping("/search")
-    public ResponseEntity<List<ResponseArticle>> searchArticleByName(@RequestParam("searchValue") String name,
+    public ResponseEntity<List<ResponseArticle>> searchArticleByName(
+            @RequestParam("searchValue") String name,
             @RequestParam("minPrice") double minPrice,
             @RequestParam("maxPrice") double maxPrice,
             @RequestParam("categories") List<Integer> categories) {
         return articleService.searchArticle(name, minPrice, maxPrice, categories)
+                .map(article -> new ResponseEntity<>(article, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    // Get article by id
+    @GetMapping("/search/by-website")
+    public ResponseEntity<List<ResponseArticle>> searchArticleByCompany(
+            @RequestParam("searchValue") String name,
+            @RequestParam("minPrice") double minPrice,
+            @RequestParam("maxPrice") double maxPrice,
+            @RequestParam("website") String website,
+            @RequestParam("categories") List<Integer> categories) {
+        return articleService.searchArticleByCompany(name, minPrice, maxPrice, categories, website)
                 .map(article -> new ResponseEntity<>(article, HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -139,4 +174,5 @@ public class ArticleController {
                 })
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
 }

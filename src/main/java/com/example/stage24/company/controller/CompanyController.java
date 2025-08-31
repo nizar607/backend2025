@@ -11,6 +11,7 @@ import com.example.stage24.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.util.StringUtils;
 
 @RestController
 @RequestMapping("/api/companies")
@@ -66,7 +68,7 @@ public class CompanyController {
     /**
      * Get company by website
      */
-    @GetMapping("/by-url/{website}")
+    @GetMapping("/by-website/{website}")
     public ResponseEntity<CompanyDTO> getCompanyByWebsite(@PathVariable String website) {
         return companyService.getCompanyByWebsite(website)
                 .map(company -> ResponseEntity.ok(company))
@@ -116,6 +118,7 @@ public class CompanyController {
         CompanyDTO updatedCompany = companyService.updateCompanyLogo(Long.parseLong(id), logoUrl);
         return updatedCompany;
     }
+
 
     /**
      * Update an existing company
@@ -172,4 +175,26 @@ public class CompanyController {
         boolean available = companyService.isCompanyNameAvailable(name);
         return ResponseEntity.ok(Map.of("available", available));
     }
+
+    // ===== Version Endpoints =====
+
+    // GET /api/companies/version-by-website?website=foo -> plain text version
+    @GetMapping(value = "/version-by-website", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> getVersionByWebsite(@RequestParam("website") String website) {
+
+        return companyService.getVersionByWebsite(website)
+                .map(version -> ResponseEntity.ok(version != null ? version : ""))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // PUT /api/companies/version/{version} -> update connected company's version using token context
+    @PutMapping("/version/{version}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<CompanyDTO> updateConnectedCompanyVersion(@PathVariable("version") String version) {
+        if (!StringUtils.hasText(version)) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(companyService.updateConnectedCompanyVersion(version));
+    }
+
 }

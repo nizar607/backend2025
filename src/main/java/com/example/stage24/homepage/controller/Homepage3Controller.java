@@ -54,6 +54,17 @@ public class Homepage3Controller {
         }
     }
     
+    @GetMapping("/by-website/{website}")
+    public ResponseEntity<Homepage3DTO> getHomepage3ByWebsite(@PathVariable String website) {
+        try {
+            Homepage3DTO homepage3 = homepage3Service.getHomepage3ByWebsite(website);
+            return ResponseEntity.ok(homepage3);
+        } catch (Exception e) {
+            log.error("Error retrieving homepage3 for website {}: {}", website, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+    
     @PostMapping
     public ResponseEntity<Homepage3DTO> createHomepage3(@RequestBody Homepage3DTO homepage3DTO) {
         try {
@@ -155,4 +166,7 @@ public class Homepage3Controller {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+
+
 }

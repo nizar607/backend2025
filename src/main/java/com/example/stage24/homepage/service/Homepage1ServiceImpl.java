@@ -56,6 +56,24 @@ public class Homepage1ServiceImpl implements Homepage1Service {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<Homepage1DTO> getHomepage1ByWebsite(String website) {
+        // First, find the company by website
+        Optional<Company> companyOpt = companyRepository.findByWebsite(website);
+        
+        if (companyOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        
+        Company company = companyOpt.get();
+        Long companyId = company.getId();
+        
+        // Find homepage1 by company ID
+        return homepage1Repository.findByCompanyIdWithCompany(companyId)
+                .map(this::convertToDTO);
+    }
+
+    @Override
     public Homepage1DTO saveHomepage1(Homepage1DTO homepage1DTO) {
         Homepage1 homepage1 = convertToEntity(homepage1DTO);
         Homepage1 savedHomepage1 = homepage1Repository.save(homepage1);

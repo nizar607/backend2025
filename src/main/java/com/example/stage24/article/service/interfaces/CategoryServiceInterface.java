@@ -19,4 +19,6 @@ public interface CategoryServiceInterface {
     public Optional<Category> getCategory(Long id);
 
     public List<Category> getAllCategories();
+
+    public List<ResponseCategory> getCategoriesByWebsite(String website);
 }

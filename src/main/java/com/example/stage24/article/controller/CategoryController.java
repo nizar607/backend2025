@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -60,6 +61,15 @@ public class CategoryController {
     public ResponseEntity<HttpStatus> deleteCategory(@PathVariable("id") Long id) {
         categoryService.deleteCategory(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    // Get categories by website
+    @PreAuthorize("permitAll()")
+    @GetMapping("/by-website/{website}")
+    public ResponseEntity<List<ResponseCategory>> getCategoriesByWebsite(@PathVariable("website") String website) {
+        log.info("Getting categories for website: {}", website);
+        List<ResponseCategory> categories = categoryService.getCategoriesByWebsite(website);
+        return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
 /*

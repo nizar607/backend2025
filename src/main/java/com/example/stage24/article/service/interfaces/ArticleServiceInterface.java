@@ -31,6 +31,10 @@ public interface ArticleServiceInterface {
     public Optional<List<ResponseArticle>> searchArticle(String name, double minPrice, double maxPrice,
             List<Integer> categories);
 
+
+    public Optional<List<ResponseArticle>> searchArticleByCompany(String name, double minPrice, double maxPrice,
+            List<Integer> categories, String website);
+
     public Optional<List<ResponseArticle>> getFavoriteArticlesByUserId();
 
     // Methods with user context for favorite checking
@@ -42,5 +46,15 @@ public interface ArticleServiceInterface {
 
     public Optional<List<ResponseArticle>> searchArticleWithFavorite(String name, double minPrice, double maxPrice,
             List<Integer> categories);
+
+    /**
+     * Get articles by website (company)
+     */
+    public Optional<List<ResponseArticle>> getArticlesByWebsite(String website);
+
+    /**
+     * Get article details by ID without user-specific data (for public access)
+     */
+    public Optional<ResponseArticle> getArticleDetails(Long id);
 
 }

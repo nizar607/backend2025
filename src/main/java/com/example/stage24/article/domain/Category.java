@@ -1,6 +1,7 @@
 package com.example.stage24.article.domain;
 
 import com.example.stage24.article.domain.Article;
+import com.example.stage24.company.model.Company;
 import com.example.stage24.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -39,6 +40,10 @@ public class Category {
     @JsonIgnore
     @OneToMany(mappedBy = "category",fetch = FetchType.EAGER)
     private List<Article> articles = new LinkedList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @NotNull
     private LocalDateTime createdAt = LocalDateTime.now();

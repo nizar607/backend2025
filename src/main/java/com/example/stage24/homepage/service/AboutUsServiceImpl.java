@@ -56,6 +56,17 @@ public class AboutUsServiceImpl implements AboutUsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<AboutUsDTO> getAboutUsByWebsite(String website) {
+        Optional<Company> company = companyRepository.findByWebsite(website);
+        if (company.isPresent()) {
+            return aboutUsRepository.findByCompanyId(company.get().getId())
+                    .map(this::convertToDTO);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public AboutUsDTO saveAboutUs(AboutUsDTO aboutUsDTO) {
         AboutUs aboutUs = convertToEntity(aboutUsDTO);
         AboutUs savedAboutUs = aboutUsRepository.save(aboutUs);

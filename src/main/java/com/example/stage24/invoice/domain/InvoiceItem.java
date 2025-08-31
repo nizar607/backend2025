@@ -1,136 +1,132 @@
 package com.example.stage24.invoice.domain;
 
-import com.example.stage24.article.domain.Article;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "invoice_items")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class InvoiceItem {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id")
+    @JoinColumn(name = "invoice_id", nullable = false)
+    @NotNull
     @JsonIgnore
     private Invoice invoice;
 
+    // Article/Article Information
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "article_id")
-    private Article article;
+    private Long articleId;
 
-    // Product details (copied for historical accuracy)
+    @NotBlank
+    private String articleName;
+
+    @Column(columnDefinition = "TEXT")
+    private String articleDescription;
+    private String articleCategory;
+    private String articleImageUrl;
+
+    // Pricing and Quantity
     @NotNull
-    private String productName;
+    @Positive
 
-    private String productDescription;
-
-    // Pricing and quantity
-    @NotNull
-    private Double unitPrice;
+    private double unitPrice;
 
     @NotNull
+    @Positive
     private Integer quantity;
 
+    // Calculated fields
     @NotNull
-    private Double totalPrice;
 
-    // Tax information
-    private Double taxRate = 0.0;
+    private double lineTotal;
 
-    private Double taxAmount = 0.0;
+    // Tax Information
 
-    // Discount information
-    private Double discountRate = 0.0;
+    private double taxRate = 0.0;
 
-    private Double discountAmount = 0.0;
-
-    // Line total (after tax and discount)
-    @NotNull
-    private Double lineTotal;
+    private double taxAmount = 0.0;
 
     // Timestamps
     @NotNull
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @NotNull
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        calculateTotals();
+        calculateLineTotal();
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-        calculateTotals();
+        calculateLineTotal();
     }
 
-    // Helper method to calculate totals
-    public void calculateTotals() {
-        if (unitPrice != null && quantity != null) {
-            totalPrice = unitPrice * quantity;
-            
-            // Calculate discount
-            if (discountRate != null && discountRate > 0) {
-                discountAmount = totalPrice * (discountRate / 100);
-            } else {
-                discountAmount = 0.0;
-            }
-            
-            Double subtotal = totalPrice - discountAmount;
-            
-            // Calculate tax
-            if (taxRate != null && taxRate > 0) {
-                taxAmount = subtotal * (taxRate / 100);
-            } else {
-                taxAmount = 0.0;
-            }
-            
-            lineTotal = subtotal + taxAmount;
+    // Helper method to calculate line total
+    public void calculateLineTotal() {
+
+        double subtotal = unitPrice * quantity;
+
+        // Calculate tax
+        if (taxRate > 0) {
+            taxAmount = subtotal * (taxRate / 100);
+        } else {
+            taxAmount = 0.0;
         }
+
+        lineTotal = subtotal + taxAmount;
+
     }
 
-    // Helper method to set product details from article
-    public void setProductDetailsFromArticle(Article article) {
-        if (article != null) {
-            this.productName = article.getName();
-            this.productDescription = article.getDescription();
-            this.unitPrice = article.getPrice();
-        }
+    // Helper method to set article details from an Article entity
+    public void setArticleDetailsFromArticle(Object article) {
+        // This method can be implemented when Article entity is available
+        // For now, it's a placeholder for future integration
     }
 
-    // Constructor with article and quantity
-    public InvoiceItem(Invoice invoice, Article article, Integer quantity) {
-        this.invoice = invoice;
-        this.article = article;
-        this.quantity = quantity;
-        setProductDetailsFromArticle(article);
-    }
-
-    // Constructor with article, quantity, and custom unit price
-    public InvoiceItem(Invoice invoice, Article article, Integer quantity, Double unitPrice) {
-        this.invoice = invoice;
-        this.article = article;
-        this.quantity = quantity;
+    // Constructor for creating invoice item with basic details
+    public InvoiceItem(Long articleId, String articleName, Double unitPrice, Integer quantity) {
+        this.articleId = articleId;
+        this.articleName = articleName;
         this.unitPrice = unitPrice;
-        setProductDetailsFromArticle(article);
-        this.unitPrice = unitPrice; // Override with custom price
+        this.quantity = quantity;
+        calculateLineTotal();
+    }
+
+    // Constructor with discount
+    public InvoiceItem(Long articleId, String articleName, Double unitPrice, Integer quantity,
+            BigDecimal discountAmount) {
+        this.articleId = articleId;
+        this.articleName = articleName;
+        this.unitPrice = unitPrice;
+        this.quantity = quantity;
+        calculateLineTotal();
+    }
+
+    // Helper method to get subtotal before tax
+    public double getSubtotal() {
+
+        return unitPrice * quantity;
     }
 }

@@ -7,6 +7,7 @@ import com.example.stage24.user.model.request.SignupRequest;
 import com.example.stage24.user.model.request.TokenRefreshRequest;
 import com.example.stage24.user.model.response.LoginResponse;
 import com.example.stage24.user.model.response.TokenRefreshResponse;
+import com.example.stage24.user.model.response.UserStatsResponse;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ public interface IUserService {
 
     public User registerUser(SignupRequest signUpRequest);
 
+     public User registerClient(SignupRequest signUpRequest, String website);
 
     public Role addRole(Role role);
 
@@ -28,4 +30,10 @@ public interface IUserService {
     public Optional<User> getUserById(Long id);
 
     public Optional<User> getConnectedUser();
+
+    public List<User> getClientUsersByCompany();
+
+    public User updateClientEnabledStatus(Long clientId, boolean enabled);
+
+    public UserStatsResponse getUserStats();
 }

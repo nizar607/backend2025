@@ -54,6 +54,17 @@ public class Homepage2Controller {
         }
     }
     
+    @GetMapping("/by-website/{website}")
+    public ResponseEntity<Homepage2DTO> getHomepage2ByWebsite(@PathVariable String website) {
+        try {
+            Homepage2DTO homepage2 = homepage2Service.getHomepage2ByWebsite(website);
+            return ResponseEntity.ok(homepage2);
+        } catch (Exception e) {
+            log.error("Error retrieving homepage2 for website {}: {}", website, e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+    
     @PostMapping
     public ResponseEntity<Homepage2DTO> createHomepage2(@RequestBody Homepage2DTO homepage2DTO) {
         try {

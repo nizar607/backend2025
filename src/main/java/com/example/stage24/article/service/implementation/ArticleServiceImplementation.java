@@ -7,6 +7,8 @@ import com.example.stage24.article.model.response.ResponseArticle;
 import com.example.stage24.article.repository.CategoryRepository;
 import com.example.stage24.article.service.interfaces.CategoryServiceInterface;
 import com.example.stage24.basket.repository.ItemRepository;
+import com.example.stage24.company.model.Company;
+import com.example.stage24.company.repository.CompanyRepository;
 import com.example.stage24.favorite.repository.FavoriteRepository;
 import com.example.stage24.user.domain.User;
 import com.example.stage24.user.repository.UserRepository;
@@ -35,23 +37,36 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ArticleServiceImplementation implements ArticleServiceInterface {
 
-    private ArticleRepository articleRepository;
-    private CategoryRepository categoryRepository;
-    private CategoryServiceInterface categoryService;
-    private SharedServiceInterface sharedService;
-    private FavoriteRepository favoriteRepository;
-    private NotificationService notificationService;
-    private ReviewRepository reviewRepository;
-    private ItemRepository itemRepository;
+    private final ArticleRepository articleRepository;
+    private final CategoryRepository categoryRepository;
+    private final CategoryServiceInterface categoryService;
+    private final SharedServiceInterface sharedService;
+    private final FavoriteRepository favoriteRepository;
+    private final NotificationService notificationService;
+    private final ReviewRepository reviewRepository;
+    private final ItemRepository itemRepository;
+    private final CompanyRepository companyRepository;
+
+
 
     @Override
     public Article addArticle(NewArticle article) {
         log.info("Adding article: " + article);
+        
+        // Get the current user's company
+        User user = sharedService.getConnectedUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Company company = user.getCompany();
+        if (company == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User must be associated with a company to add articles");
+        }
+        
         Article savedArticle = new Article();
         savedArticle.setName(article.getName());
         savedArticle.setDescription(article.getDescription());
         savedArticle.setPrice(article.getPrice());
         savedArticle.setImage(article.getImage());
+        savedArticle.setCompany(company); // Associate article with company
 
         Category category = categoryService.getCategory(article.getCategory())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
@@ -135,6 +150,36 @@ public class ArticleServiceImplementation implements ArticleServiceInterface {
         return Optional.of(articleResponses);
     }
 
+        @Override
+    public Optional<List<ResponseArticle>> searchArticleByCompany(String name, double minPrice, double maxPrice,
+            List<Integer> categories, String website) {
+        log.info("Searching articles for website: {} with criteria: name={}, minPrice={}, maxPrice={}, categories={}", 
+                website, name, minPrice, maxPrice, categories);
+        
+        // Find company by website
+        Company company = companyRepository.findByWebsite(website)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found for website: " + website));
+        
+        // Search articles by company and other criteria
+        List<Article> articles = articleRepository
+                .findArticleByNameLikeAndPriceBetweenAndCategoryIdInAndCompany("%" + name + "%", minPrice, maxPrice, categories, company)
+                .orElse(List.of());
+                
+        
+        if (articles.isEmpty()) {
+            log.info("No articles found for website: {} with given criteria", website);
+            return Optional.of(List.of());
+        }
+        
+        List<ResponseArticle> articleResponses = articles.stream().map((article) -> {
+            ResponseArticle responseArticle = new ResponseArticle(article);
+            return responseArticle;
+        }).toList();
+        
+        log.info("Found {} articles for website: {} with given criteria", articleResponses.size(), website);
+        return Optional.of(articleResponses);
+    }
+
     @Override
     public Optional<List<ResponseArticle>> getArticleByPriceResponse(double minPrice, double maxPrice) {
         List<Article> articles = articleRepository.findArticleByPriceBetween(minPrice, maxPrice)
@@ -179,6 +224,14 @@ public class ArticleServiceImplementation implements ArticleServiceInterface {
     // Helper method to check if an article is in user's cart
     private boolean isArticleInCart(Long articleId, Set<Long> cartArticleIds) {
         return cartArticleIds.contains(articleId);
+    }
+
+    @Override
+    public Optional<ResponseArticle> getArticleDetails(Long id) {
+        Article article = articleRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Article not found"));
+        // Return article without user-specific data for public access
+        return Optional.of(new ResponseArticle(article, false, false));
     }
 
     @Override
@@ -232,6 +285,33 @@ public class ArticleServiceImplementation implements ArticleServiceInterface {
         List<ResponseArticle> articleResponses = articles.stream()
                 .map(article -> new ResponseArticle(article, isArticleFavorited(article.getId())))
                 .toList();
+        return Optional.of(articleResponses);
+    }
+
+
+
+    @Override
+    public Optional<List<ResponseArticle>> getArticlesByWebsite(String website) {
+        log.info("Fetching articles for website: {}", website);
+        
+        // Find company by website
+        Company company = companyRepository.findByWebsite(website)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found for website: " + website));
+        
+        // Find articles by company
+        List<Article> articles = articleRepository.findByCompany(company)
+                .orElse(List.of());
+        
+        if (articles.isEmpty()) {
+            log.info("No articles found for website: {}", website);
+            return Optional.of(List.of());
+        }
+        
+        List<ResponseArticle> articleResponses = articles.stream()
+                .map(ResponseArticle::new)
+                .collect(Collectors.toList());
+        
+        log.info("Found {} articles for website: {}", articleResponses.size(), website);
         return Optional.of(articleResponses);
     }
 
